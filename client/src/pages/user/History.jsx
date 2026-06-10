@@ -44,7 +44,7 @@ export default function UserHistory() {
   if (loading) return <div className="p-8 text-center">{t('loading')}</div>;
 
   return (
-    <div className="max-w-3xl mx-auto px-4 py-8">
+    <div className="max-w-2xl mx-auto">
       <h1 className="text-2xl font-bold mb-6">{t('history')}</h1>
 
       {submissions.length === 0 ? (
@@ -58,7 +58,7 @@ export default function UserHistory() {
                 onClick={() => toggle(sub)}
               >
                 <div className="flex items-center gap-3">
-                  <CheckCircle size={16} className="text-green-500 shrink-0" />
+                  <CheckCircle size={16} className="text-[#3D6B35] shrink-0" />
                   <div>
                     <p className="font-medium text-sm">
                       {isAr && sub.title_ar ? sub.title_ar : sub.title}

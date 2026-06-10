@@ -1,1 +1,22 @@
+# Dependencies
 node_modules
+client/node_modules
+server/node_modules
+
+# Environment variables — NEVER commit these
+.env
+.env.local
+.env.production
+
+# Build output
+client/dist
+
+# Uploaded files (user content — not tracked in git)
+server/uploads/*
+!server/uploads/.gitkeep
+
+# Logs & OS junk
+*.log
+npm-debug.log*
+.DS_Store
+Thumbs.db

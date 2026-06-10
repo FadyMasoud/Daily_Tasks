@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none">
+  <!-- Burgundy rounded background -->
+  <rect width="32" height="32" rx="5" fill="#7B2D3E"/>
+
+  <!-- Open book — left page -->
+  <path d="M4 10.5 C8 9.5 12 9.5 15 11 L15 24.5 C12 23 8 23 4 23.5 Z" fill="#F5ECD7"/>
+
+  <!-- Open book — right page (slightly darker parchment) -->
+  <path d="M28 10.5 C24 9.5 20 9.5 17 11 L17 24.5 C20 23 24 23 28 23.5 Z" fill="#EDD8B0"/>
+
+  <!-- Gold spine -->
+  <line x1="16" y1="10.5" x2="16" y2="25" stroke="#C4963A" stroke-width="2" stroke-linecap="round"/>
+
+  <!-- Text lines on left page -->
+  <line x1="6" y1="15"   x2="13" y2="15.3" stroke="#7B2D3E" stroke-width="0.9" stroke-linecap="round" opacity="0.35"/>
+  <line x1="6" y1="17.5" x2="13" y2="17.8" stroke="#7B2D3E" stroke-width="0.9" stroke-linecap="round" opacity="0.35"/>
+  <line x1="6" y1="20"   x2="13" y2="20.3" stroke="#7B2D3E" stroke-width="0.9" stroke-linecap="round" opacity="0.35"/>
+</svg>

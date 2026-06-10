@@ -66,7 +66,7 @@ export default function TaskDetail() {
   if (!task) return null;
 
   return (
-    <div className="max-w-3xl mx-auto px-4 py-8">
+    <div className="max-w-2xl mx-auto">
       <button
         onClick={() => navigate('/user/tasks')}
         className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground mb-6 transition-colors"

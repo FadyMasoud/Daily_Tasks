@@ -73,10 +73,10 @@ export default function UserCalendar() {
   if (loading) return <div className="flex items-center justify-center h-screen text-muted-foreground">جاري التحميل...</div>;
 
   return (
-    <div className="flex flex-col lg:flex-row h-[calc(100vh-56px)]">
+    <div className="flex flex-col lg:flex-row min-h-[600px] lg:h-[calc(100vh-160px)]">
 
       {/* ── Calendar panel ── */}
-      <div className="flex-1 flex flex-col p-4 lg:p-8 overflow-auto">
+      <div className="flex-1 flex flex-col overflow-auto">
 
         {/* Month / year header */}
         <div className="flex items-center justify-between mb-4">
@@ -153,8 +153,8 @@ export default function UserCalendar() {
                 </span>
                 {dayTasks.length > 0 && (
                   <div className="flex gap-0.5 mt-1.5 flex-wrap justify-center">
-                    {done    > 0 && <span className={`w-1.5 h-1.5 rounded-full ${sel ? 'bg-green-300' : 'bg-green-500'}`} />}
-                    {pending > 0 && <span className={`w-1.5 h-1.5 rounded-full ${sel ? 'bg-yellow-200' : 'bg-yellow-400'}`} />}
+                    {done    > 0 && <span className={`w-1.5 h-1.5 rounded-full ${sel ? 'bg-[#7FAB7A]' : 'bg-[#3D6B35]'}`} />}
+                    {pending > 0 && <span className={`w-1.5 h-1.5 rounded-full ${sel ? 'bg-[#E8D090]' : 'bg-[#C4963A]'}`} />}
                   </div>
                 )}
               </button>
@@ -165,11 +165,11 @@ export default function UserCalendar() {
         {/* Legend */}
         <div className="flex items-center justify-center gap-6 mt-4 text-xs text-muted-foreground select-none">
           <span className="flex items-center gap-1.5">
-            <span className="w-2.5 h-2.5 rounded-full bg-green-500 inline-block" />
+            <span className="w-2.5 h-2.5 rounded-full bg-[#3D6B35] inline-block" />
             {isAr ? 'مكتملة' : 'Completed'}
           </span>
           <span className="flex items-center gap-1.5">
-            <span className="w-2.5 h-2.5 rounded-full bg-yellow-400 inline-block" />
+            <span className="w-2.5 h-2.5 rounded-full bg-[#C4963A] inline-block" />
             {isAr ? 'معلقة' : 'Pending'}
           </span>
           <span className="flex items-center gap-1.5">
@@ -180,7 +180,7 @@ export default function UserCalendar() {
       </div>
 
       {/* ── Side panel ── */}
-      <div className="w-full lg:w-[320px] border-t lg:border-t-0 lg:border-s border-border flex flex-col bg-card">
+      <div className="w-full lg:w-[300px] border-t lg:border-t-0 lg:border-s border-border flex flex-col bg-card max-h-[500px] lg:max-h-none overflow-hidden">
         {/* Panel header */}
         <div className="px-5 py-4 border-b border-border bg-muted/30">
           <div className="flex items-center gap-2">
@@ -210,24 +210,24 @@ export default function UserCalendar() {
               className={[
                 'rounded-xl border p-3.5 transition-all',
                 task.submitted
-                  ? 'border-green-200 bg-green-50 dark:bg-green-900/20 dark:border-green-800/50'
+                  ? 'border-[#B8CEB4] bg-[#F0F5EF] dark:bg-[#0E1F0D] dark:border-[#2D4D2A]'
                   : task.locked
                   ? 'border-border bg-muted/20 opacity-60'
-                  : 'border-yellow-200 bg-yellow-50 dark:bg-yellow-900/20 dark:border-yellow-800/50 cursor-pointer hover:shadow-sm hover:-translate-y-0.5',
+                  : 'border-[#E2CC88] bg-[#FDF7E8] dark:bg-[#2B1E00] dark:border-[#604E1A] cursor-pointer hover:shadow-sm hover:-translate-y-0.5',
               ].join(' ')}
             >
               <div className="flex items-start gap-2.5">
                 {task.submitted
-                  ? <CheckCircle size={15} className="text-green-600 mt-0.5 shrink-0" />
+                  ? <CheckCircle size={15} className="text-[#3D6B35] mt-0.5 shrink-0" />
                   : task.locked
                   ? <Lock        size={15} className="text-muted-foreground mt-0.5 shrink-0" />
-                  : <Clock       size={15} className="text-yellow-600 mt-0.5 shrink-0" />}
+                  : <Clock       size={15} className="text-[#A07830] mt-0.5 shrink-0" />}
                 <div>
                   <p className="text-sm font-medium leading-snug">
                     {isAr && task.title_ar ? task.title_ar : task.title}
                   </p>
                   <p className={`text-xs mt-0.5 ${
-                    task.submitted ? 'text-green-600' : task.locked ? 'text-muted-foreground' : 'text-yellow-600'
+                    task.submitted ? 'text-[#3D6B35]' : task.locked ? 'text-muted-foreground' : 'text-[#A07830]'
                   }`}>
                     {task.submitted
                       ? (isAr ? 'مكتملة' : 'Completed')

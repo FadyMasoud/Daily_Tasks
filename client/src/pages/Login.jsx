@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../components/ui/toast';
-import { TreePine, Sprout, Leaf, Mail, Lock, LogIn } from 'lucide-react';
+import { BookOpen, Mail, Lock, LogIn } from 'lucide-react';
 
 export default function Login() {
   const { t }     = useTranslation();
@@ -34,42 +34,32 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-zinc-950">
+    <div className="min-h-screen flex items-center justify-center bg-background px-4 py-12">
+      <div className="w-full max-w-sm">
 
-      {/* ── Header ── */}
-      <header className="bg-gradient-to-r from-emerald-500 to-green-400 shadow-md">
-        <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-center gap-2">
-          <div className="flex items-end gap-1">
-            <Sprout   size={16} className="text-emerald-100 mb-0.5" />
-            <TreePine size={26} className="text-white" />
-            <Leaf     size={13} className="text-emerald-100 mb-1" />
-          </div>
-          <span className="text-white font-bold text-xl tracking-wide">قراءات يومية</span>
-        </div>
-      </header>
+        {/* Card */}
+        <div className="bg-card rounded-md shadow-sm border border-border overflow-hidden">
 
-      {/* ── Main ── */}
-      <main className="flex-1 flex items-center justify-center px-4 py-12">
-        <div className="w-full max-w-sm">
+          {/* Antique gold top accent */}
+          <div className="h-1 bg-[#C4963A]" />
 
-          {/* Card */}
-          <div className="bg-white dark:bg-zinc-900 rounded-3xl shadow-xl border border-gray-100 dark:border-zinc-800 overflow-hidden">
+          <div className="px-8 pt-8 pb-8">
 
-            {/* Card top accent */}
-            <div className="h-1.5 bg-gradient-to-r from-emerald-400 to-green-500" />
+            {/* Brand */}
+            <div className="flex items-center justify-center gap-2 mb-7">
+              <BookOpen size={22} className="text-primary" />
+              <span className="font-bold text-lg text-foreground tracking-widest">قراءات يومية</span>
+            </div>
 
-            <div className="px-8 pt-8 pb-6">
-              {/* Icon cluster */}
-              <div className="flex items-end justify-center gap-1.5 mb-6">
-                <Sprout   size={18} className="text-emerald-400 mb-0.5" />
-                <TreePine size={36} className="text-emerald-600" />
-                <Leaf     size={14} className="text-green-400 mb-1" />
-              </div>
+            <form onSubmit={handleSubmit} className="space-y-4">
 
-              <form onSubmit={handleSubmit} className="space-y-4">
-                {/* Email */}
+              {/* Email */}
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                  {t('email')}
+                </label>
                 <div className="relative">
-                  <Mail size={15} className="absolute start-3.5 top-1/2 -translate-y-1/2 text-emerald-400 pointer-events-none" />
+                  <Mail size={14} className="absolute start-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
                   <input
                     type="email"
                     value={form.email}
@@ -77,13 +67,18 @@ export default function Login() {
                     placeholder={t('email')}
                     required
                     autoComplete="email"
-                    className="w-full border border-gray-200 dark:border-zinc-700 bg-gray-50 dark:bg-zinc-800 text-foreground placeholder:text-gray-400 rounded-xl ps-10 pe-4 py-3 text-sm outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/20 transition-all"
+                    className="w-full border border-input bg-background text-foreground placeholder:text-muted-foreground rounded-md ps-9 pe-4 py-2.5 text-sm outline-none focus:border-ring focus:ring-2 focus:ring-ring/20 transition-all"
                   />
                 </div>
+              </div>
 
-                {/* Password */}
+              {/* Password */}
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                  {t('password')}
+                </label>
                 <div className="relative">
-                  <Lock size={15} className="absolute start-3.5 top-1/2 -translate-y-1/2 text-emerald-400 pointer-events-none" />
+                  <Lock size={14} className="absolute start-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
                   <input
                     type="password"
                     value={form.password}
@@ -91,38 +86,35 @@ export default function Login() {
                     placeholder={t('password')}
                     required
                     autoComplete="current-password"
-                    className="w-full border border-gray-200 dark:border-zinc-700 bg-gray-50 dark:bg-zinc-800 text-foreground placeholder:text-gray-400 rounded-xl ps-10 pe-4 py-3 text-sm outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/20 transition-all"
+                    className="w-full border border-input bg-background text-foreground placeholder:text-muted-foreground rounded-md ps-9 pe-4 py-2.5 text-sm outline-none focus:border-ring focus:ring-2 focus:ring-ring/20 transition-all"
                   />
                 </div>
+              </div>
 
-                {/* Submit */}
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-emerald-500 to-green-500 hover:from-emerald-600 hover:to-green-600 text-white font-bold rounded-xl py-3 text-sm transition-all shadow-md hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-60"
-                >
-                  <LogIn size={15} />
-                  {loading ? t('loading') : t('login')}
-                </button>
-              </form>
+              {/* Submit */}
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full flex items-center justify-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold rounded-md py-2.5 text-sm transition-colors border border-primary/60 shadow-sm disabled:opacity-60 mt-2"
+              >
+                <LogIn size={14} />
+                {loading ? t('loading') : t('login')}
+              </button>
+            </form>
 
-              <p className="mt-5 text-center text-sm text-muted-foreground">
-                {t('no_account')}{' '}
-                <Link to="/register" className="text-emerald-600 font-semibold hover:text-emerald-700 transition-colors">
-                  {t('sign_up')}
-                </Link>
-              </p>
+            <div className="mt-5 pt-4 border-t border-border text-center text-sm text-muted-foreground">
+              {t('no_account')}{' '}
+              <Link to="/register" className="text-primary font-semibold hover:text-primary/80 transition-colors">
+                {t('sign_up')}
+              </Link>
             </div>
           </div>
         </div>
-      </main>
 
-      {/* ── Footer ── */}
-      <footer className="py-4 text-center text-xs text-muted-foreground border-t border-gray-100 dark:border-zinc-800">
-        جميع الحقوق محفوظة © FEQ
-        &nbsp;·&nbsp;
-        All Rights Reserved © FEQ
-      </footer>
+        <p className="mt-4 text-center text-xs text-muted-foreground">
+          جميع الحقوق محفوظة © FEQ · All Rights Reserved
+        </p>
+      </div>
     </div>
   );
 }

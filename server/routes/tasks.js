@@ -192,6 +192,28 @@ router.post('/upload-questions/:taskId', auth, adminOnly, upload.single('file'),
   }
 });
 
+// POST /api/tasks/save-questions/:taskId — save questions from manual input (admin)
+router.post('/save-questions/:taskId', auth, adminOnly, async (req, res) => {
+  const { questions } = req.body;
+  if (!Array.isArray(questions) || !questions.length)
+    return res.status(400).json({ message: 'No questions provided' });
+
+  try {
+    await pool.execute('DELETE FROM questions WHERE task_id = ?', [req.params.taskId]);
+    for (let i = 0; i < questions.length; i++) {
+      const q = questions[i];
+      await pool.execute(
+        'INSERT INTO questions (task_id, question_text, question_ar, order_index) VALUES (?, ?, ?, ?)',
+        [req.params.taskId, q.question_text || '', q.question_ar || '', i]
+      );
+    }
+    res.json({ message: 'Questions saved', count: questions.length });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
 // POST /api/tasks/parse-preview — parse Excel without saving (admin)
 router.post('/parse-preview', auth, adminOnly, upload.single('file'), async (req, res) => {
   if (!req.file) return res.status(400).json({ message: 'No file uploaded' });

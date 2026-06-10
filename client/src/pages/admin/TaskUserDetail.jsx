@@ -35,7 +35,7 @@ export default function TaskUserDetail() {
   const taskTitle = isAr && data.task.title_ar ? data.task.title_ar : data.task.title;
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-8">
+    <div className="max-w-xl mx-auto">
 
       {/* Back */}
       <button
@@ -46,43 +46,37 @@ export default function TaskUserDetail() {
         العودة إلى الإجابات
       </button>
 
-      {/* Hero card */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-green-700 via-green-600 to-emerald-500 p-6 mb-6 shadow-lg text-white">
-        {/* decorative circle */}
-        <div className="absolute -top-8 -left-8 w-40 h-40 rounded-full bg-white/10" />
-        <div className="absolute -bottom-10 -right-6 w-48 h-48 rounded-full bg-white/5" />
-
-        <div className="relative z-10">
-          {/* Task name */}
-          <div className="flex items-start gap-3 mb-4">
-            <div className="bg-white/20 rounded-xl p-2 shrink-0">
-              <BookOpen size={20} />
+      {/* Classic header card */}
+      <div className="rounded-md border border-border bg-card overflow-hidden mb-6 shadow-sm">
+        {/* Burgundy title bar */}
+        <div className="bg-primary px-6 py-4">
+          <div className="flex items-start gap-3">
+            <div className="bg-primary-foreground/20 rounded-md p-2 shrink-0 border border-primary-foreground/20">
+              <BookOpen size={18} className="text-primary-foreground" />
             </div>
             <div>
-              <p className="text-xs text-green-200 font-medium mb-0.5">المهمة</p>
-              <h1 className="text-lg font-bold leading-snug">{taskTitle}</h1>
+              <p className="text-xs text-primary-foreground/70 font-medium mb-0.5">المهمة</p>
+              <h1 className="text-lg font-bold leading-snug text-primary-foreground">{taskTitle}</h1>
             </div>
           </div>
+        </div>
 
-          {/* User + date row */}
-          <div className="flex flex-wrap items-center gap-4 text-sm text-green-100">
+        {/* Details section */}
+        <div className="px-6 py-4 flex flex-wrap items-center justify-between gap-4 border-t border-border">
+          <div className="flex flex-wrap items-center gap-4 text-sm text-foreground">
             <span className="flex items-center gap-1.5">
-              <User size={13} />
-              <span className="font-medium text-white">{data.user.username}</span>
+              <User size={13} className="text-muted-foreground" />
+              <span className="font-medium">{data.user.username}</span>
             </span>
-            <span className="text-green-300">·</span>
-            <span className="flex items-center gap-1.5">
-              <span>{data.user.email}</span>
-            </span>
+            <span className="text-border">·</span>
+            <span className="text-muted-foreground text-xs">{data.user.email}</span>
           </div>
-
-          {/* Submission date + badge */}
-          <div className="flex items-center justify-between mt-4">
-            <span className="flex items-center gap-1.5 text-xs text-green-200">
+          <div className="flex items-center gap-3">
+            <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
               <Calendar size={12} />
               {new Date(data.submission.submitted_at).toLocaleString(isAr ? 'ar-SA' : 'en-US')}
             </span>
-            <Badge className="bg-white/20 text-white border-white/30 flex items-center gap-1">
+            <Badge variant="success" className="flex items-center gap-1">
               <CheckCircle size={11} />
               مكتملة
             </Badge>
@@ -99,7 +93,7 @@ export default function TaskUserDetail() {
             <CardContent className="p-0">
               {/* Question */}
               <div className="flex items-start gap-3 px-5 pt-4 pb-3 bg-muted/30 border-b border-border">
-                <span className="shrink-0 flex items-center justify-center w-6 h-6 rounded-full bg-primary/10 text-primary text-xs font-bold mt-0.5">
+                <span className="shrink-0 flex items-center justify-center w-6 h-6 rounded bg-primary/10 text-primary text-xs font-bold mt-0.5 border border-primary/20">
                   {i + 1}
                 </span>
                 <p className="text-sm font-medium leading-relaxed" dir={isAr ? 'rtl' : 'ltr'}>

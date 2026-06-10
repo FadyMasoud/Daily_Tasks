@@ -6,11 +6,13 @@ import { Button } from '../../components/ui/button';
 import { Badge } from '../../components/ui/badge';
 import { Input } from '../../components/ui/input';
 import { useToast } from '../../components/ui/toast';
+import { useConfirm } from '../../components/ui/confirm-dialog';
 import { Pencil, Trash2, Plus, Check, X } from 'lucide-react';
 
 export default function AdminTaskList() {
   const { t, i18n } = useTranslation();
   const { toast } = useToast();
+  const { confirm } = useConfirm();
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [editingId, setEditingId] = useState(null);
@@ -51,7 +53,14 @@ export default function AdminTaskList() {
   };
 
   const deleteTask = async (id) => {
-    if (!confirm('Delete this task?')) return;
+    const ok = await confirm({
+      type: 'delete',
+      title: t('confirm_delete_task_title'),
+      message: t('confirm_delete_task_msg'),
+      confirmLabel: t('delete'),
+      cancelLabel: t('cancel'),
+    });
+    if (!ok) return;
     try {
       await axios.delete(`/api/tasks/${id}`);
       setTasks(prev => prev.filter(t => t.id !== id));
@@ -64,7 +73,7 @@ export default function AdminTaskList() {
   if (loading) return <div className="p-8 text-center">{t('loading')}</div>;
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8">
+    <div>
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold">{t('task_list')}</h1>
         <Link to="/admin/upload">
@@ -106,8 +115,8 @@ export default function AdminTaskList() {
                           onChange={e => setEditSchedule(e.target.value)}
                           className="h-7 text-xs w-48"
                         />
-                        <button onClick={() => saveSchedule(task.id)} className="text-green-500 hover:text-green-600"><Check size={14} /></button>
-                        <button onClick={() => setEditingId(null)} className="text-red-500 hover:text-red-600"><X size={14} /></button>
+                        <button onClick={() => saveSchedule(task.id)} className="text-primary hover:text-primary/80"><Check size={14} /></button>
+                        <button onClick={() => setEditingId(null)} className="text-destructive hover:text-destructive/80"><X size={14} /></button>
                       </div>
                     ) : (
                       <button

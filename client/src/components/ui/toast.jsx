@@ -6,24 +6,24 @@ const ToastContext = createContext(null);
 
 const VARIANTS = {
   default: {
-    container: 'border-green-400/40 bg-green-500 text-white',
-    icon: <CheckCircle size={18} className="text-white shrink-0 mt-0.5" />,
+    container: 'border-[#3D6B35]/40 bg-[#F0F5EF] text-[#1A3018]',
+    icon: <CheckCircle size={18} className="text-[#3D6B35] shrink-0 mt-0.5" />,
   },
   success: {
-    container: 'border-green-400/40 bg-green-500 text-white',
-    icon: <CheckCircle size={18} className="text-white shrink-0 mt-0.5" />,
+    container: 'border-[#3D6B35]/40 bg-[#F0F5EF] text-[#1A3018]',
+    icon: <CheckCircle size={18} className="text-[#3D6B35] shrink-0 mt-0.5" />,
   },
   destructive: {
-    container: 'border-red-400/40 bg-red-500 text-white',
-    icon: <XCircle size={18} className="text-white shrink-0 mt-0.5" />,
+    container: 'border-[#8B2020]/40 bg-[#FDF0F0] text-[#5C0D0D]',
+    icon: <XCircle size={18} className="text-[#8B2020] shrink-0 mt-0.5" />,
   },
   warning: {
-    container: 'border-yellow-400/40 bg-yellow-400 text-yellow-900',
-    icon: <AlertTriangle size={18} className="text-yellow-900 shrink-0 mt-0.5" />,
+    container: 'border-[#A07830]/40 bg-[#FDF7E8] text-[#5C3A00]',
+    icon: <AlertTriangle size={18} className="text-[#A07830] shrink-0 mt-0.5" />,
   },
   info: {
-    container: 'border-blue-400/40 bg-blue-500 text-white',
-    icon: <Info size={18} className="text-white shrink-0 mt-0.5" />,
+    container: 'border-primary/40 bg-card text-foreground',
+    icon: <Info size={18} className="text-primary shrink-0 mt-0.5" />,
   },
 };
 
@@ -48,7 +48,7 @@ export function ToastProvider({ children }) {
             <div
               key={t.id}
               className={cn(
-                'relative flex items-start gap-3 rounded-xl border p-4 shadow-xl',
+                'relative flex items-start gap-3 rounded-md border p-4 shadow-md',
                 'animate-in slide-in-from-top-4 fade-in duration-300',
                 style.container
               )}
