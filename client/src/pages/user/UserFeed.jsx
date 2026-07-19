@@ -1,9 +1,11 @@
-import { useState, useEffect, useRef, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import axios from 'axios';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../components/ui/toast';
-import { Heart, MessageCircle, Copy, Send, Trash2, ImageOff, CheckCheck } from 'lucide-react';
+import CommentsThread from '../../components/CommentsThread';
+import useMediaQuery from '../../hooks/useMediaQuery';
+import { Heart, MessageCircle, Copy, ImageOff, CheckCheck } from 'lucide-react';
 
 const FEED_PAGE_SIZE = 5;
 
@@ -79,58 +81,11 @@ function Avatar({ name }) {
 // ── PostCard ──────────────────────────────────────────────────
 function PostCard({ post, currentUser, onLikeToggle }) {
   const { t } = useTranslation();
-  const { toast } = useToast();
   const [showComments, setShowComments] = useState(false);
-  const [comments, setComments]         = useState([]);
-  const [loadingComments, setLoadingComments] = useState(false);
-  const [commentText, setCommentText]   = useState('');
-  const [submitting, setSubmitting]     = useState(false);
+  const [commentCount, setCommentCount] = useState(post.comment_count);
   const [copied, setCopied]             = useState(false);
-  const inputRef = useRef(null);
 
-  const loadComments = async () => {
-    if (comments.length > 0) return;
-    setLoadingComments(true);
-    try {
-      const { data } = await axios.get(`/api/posts/${post.id}/comments`);
-      setComments(data);
-    } catch {
-      toast({ title: t('comment_load_error'), variant: 'destructive' });
-    } finally {
-      setLoadingComments(false);
-    }
-  };
-
-  const toggleComments = () => {
-    const next = !showComments;
-    setShowComments(next);
-    if (next) loadComments();
-    if (next) setTimeout(() => inputRef.current?.focus(), 150);
-  };
-
-  const handleComment = async (e) => {
-    e.preventDefault();
-    if (!commentText.trim()) return;
-    setSubmitting(true);
-    try {
-      const { data } = await axios.post(`/api/posts/${post.id}/comments`, { comment_text: commentText.trim() });
-      setComments(prev => [...prev, data]);
-      setCommentText('');
-    } catch {
-      toast({ title: t('comment_send_error'), variant: 'destructive' });
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  const handleDeleteComment = async (commentId) => {
-    try {
-      await axios.delete(`/api/posts/comments/${commentId}`);
-      setComments(prev => prev.filter(c => c.id !== commentId));
-    } catch {
-      toast({ title: t('comment_delete_error'), variant: 'destructive' });
-    }
-  };
+  const toggleComments = () => setShowComments(prev => !prev);
 
   const handleCopy = () => {
     navigator.clipboard.writeText(post.description).then(() => {
@@ -160,7 +115,7 @@ function PostCard({ post, currentUser, onLikeToggle }) {
         </div>
       ) : null}
 
-      {(post.like_count > 0 || post.comment_count > 0) && (
+      {(post.like_count > 0 || commentCount > 0) && (
         <div className="flex items-center justify-between px-4 py-2 text-xs text-muted-foreground border-b border-border">
           {post.like_count > 0 && (
             <span className="flex items-center gap-1">
@@ -170,9 +125,9 @@ function PostCard({ post, currentUser, onLikeToggle }) {
               {post.like_count}
             </span>
           )}
-          {post.comment_count > 0 && (
+          {commentCount > 0 && (
             <button onClick={toggleComments} className="hover:underline ms-auto">
-              {post.comment_count} {t('comment_action')}
+              {commentCount} {t('comment_action')}
             </button>
           )}
         </div>
@@ -209,56 +164,14 @@ function PostCard({ post, currentUser, onLikeToggle }) {
       </div>
 
       {showComments && (
-        <div className="px-4 py-3 space-y-3 bg-background/50">
-          {loadingComments ? (
-            <p className="text-xs text-muted-foreground text-center py-2">{t('loading_comments')}</p>
-          ) : comments.length === 0 ? (
-            <p className="text-xs text-muted-foreground text-center py-2">{t('no_comments')}</p>
-          ) : (
-            comments.map(c => (
-              <div key={c.id} className="flex items-start gap-2.5">
-                <Avatar name={c.username} />
-                <div className="flex-1 min-w-0 bg-muted/50 rounded-md px-3 py-2">
-                  <div className="flex items-center justify-between gap-2">
-                    <p className="text-xs font-semibold text-foreground">{c.username}</p>
-                    <div className="flex items-center gap-1">
-                      <p className="text-xs text-muted-foreground">{timeAgo(c.created_at, t)}</p>
-                      {(c.username === currentUser?.username || currentUser?.role === 'admin') && (
-                        <button
-                          onClick={() => handleDeleteComment(c.id)}
-                          className="p-0.5 text-muted-foreground hover:text-destructive transition-colors"
-                        >
-                          <Trash2 size={11} />
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                  <p className="text-sm text-foreground mt-0.5 leading-snug">{c.comment_text}</p>
-                </div>
-              </div>
-            ))
-          )}
-
-          <form onSubmit={handleComment} className="flex items-center gap-2 pt-1">
-            <Avatar name={currentUser?.username} />
-            <div className="flex-1 flex items-center gap-2 bg-muted/50 rounded-full px-4 py-2 border border-border">
-              <input
-                ref={inputRef}
-                value={commentText}
-                onChange={e => setCommentText(e.target.value)}
-                placeholder={t('comment_placeholder')}
-                className="flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
-              />
-              <button
-                type="submit"
-                disabled={submitting || !commentText.trim()}
-                className="text-primary hover:text-primary/80 disabled:opacity-40 transition-colors shrink-0"
-              >
-                <Send size={15} />
-              </button>
-            </div>
-          </form>
-        </div>
+        <CommentsThread
+          postId={post.id}
+          currentUser={currentUser}
+          initialCount={3}
+          pageSize={5}
+          onCountChange={setCommentCount}
+          className="px-4 py-3 bg-background/50"
+        />
       )}
     </article>
   );
@@ -272,6 +185,10 @@ export default function UserFeed() {
   const [posts, setPosts]   = useState([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage]     = useState(1);
+  // Large screens keep numbered pages; small screens grow this on scroll.
+  const [visibleCount, setVisibleCount] = useState(FEED_PAGE_SIZE);
+  const isLargeScreen = useMediaQuery('(min-width: 1024px)');
+  const sentinelRef = useRef(null);
 
   useEffect(() => {
     axios.get('/api/posts')
@@ -303,6 +220,31 @@ export default function UserFeed() {
     return sorted.slice(start, start + FEED_PAGE_SIZE);
   }, [sorted, page]);
 
+  const infiniteSlice = useMemo(() =>
+    sorted.slice(0, visibleCount),
+  [sorted, visibleCount]);
+
+  const hasMoreToScroll = visibleCount < sorted.length;
+
+  // Infinite scroll (small screens): grow visibleCount when the sentinel appears.
+  useEffect(() => {
+    if (isLargeScreen || loading) return;
+    const el = sentinelRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      entries => {
+        if (entries[0].isIntersecting) {
+          setVisibleCount(c => Math.min(c + FEED_PAGE_SIZE, sorted.length));
+        }
+      },
+      { rootMargin: '200px' }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [isLargeScreen, loading, sorted.length, hasMoreToScroll]);
+
+  const displayed = isLargeScreen ? paginated : infiniteSlice;
+
   if (loading) return (
     <div className="py-20 text-center text-muted-foreground">{t('loading')}</div>
   );
@@ -325,7 +267,7 @@ export default function UserFeed() {
         </div>
       ) : (
         <div className="space-y-4">
-          {paginated.map(post => (
+          {displayed.map(post => (
             <PostCard
               key={post.id}
               post={post}
@@ -333,12 +275,21 @@ export default function UserFeed() {
               onLikeToggle={handleLikeToggle}
             />
           ))}
-          <Paginator
-            page={page}
-            total={sorted.length}
-            pageSize={FEED_PAGE_SIZE}
-            onPageChange={setPage}
-          />
+
+          {isLargeScreen ? (
+            <Paginator
+              page={page}
+              total={sorted.length}
+              pageSize={FEED_PAGE_SIZE}
+              onPageChange={setPage}
+            />
+          ) : (
+            hasMoreToScroll && (
+              <div ref={sentinelRef} className="py-6 text-center text-xs text-muted-foreground">
+                {t('loading')}
+              </div>
+            )
+          )}
         </div>
       )}
     </div>

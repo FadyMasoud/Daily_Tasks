@@ -176,15 +176,46 @@ router.post('/:id/like', auth, async (req, res) => {
 });
 
 // ── GET /api/posts/:id/comments ───────────────────────────────
+// Supports Facebook-style pagination:
+//   ?limit=N            → newest N comments (returned oldest→newest)
+//   ?limit=N&before=ID  → the N comments older than comment ID (for "view previous")
+// Response: { comments: [...ascending...], total }
+// Without `limit`, returns every comment ascending (back-compat for callers that want all).
 router.get('/:id/comments', auth, async (req, res) => {
   try {
-    const [rows] = await pool.execute(
-      `SELECT c.id, c.comment_text, c.created_at, u.username
-       FROM post_comments c JOIN users u ON u.id = c.user_id
-       WHERE c.post_id = ? ORDER BY c.created_at ASC`,
-      [req.params.id]
+    const postId = req.params.id;
+    const limit  = Math.min(Math.max(parseInt(req.query.limit, 10) || 0, 0), 100);
+    const before = parseInt(req.query.before, 10) || 0;
+
+    const [[{ total }]] = await pool.execute(
+      'SELECT COUNT(*) AS total FROM post_comments WHERE post_id = ?',
+      [postId]
     );
-    res.json(rows);
+
+    let rows;
+    if (limit > 0) {
+      // Fetch newest-first (cursor by id keeps it stable as new comments arrive),
+      // then reverse so the client renders them chronologically.
+      const params = [postId];
+      let where = 'c.post_id = ?';
+      if (before) { where += ' AND c.id < ?'; params.push(before); }
+      [rows] = await pool.execute(
+        `SELECT c.id, c.comment_text, c.created_at, u.username
+         FROM post_comments c JOIN users u ON u.id = c.user_id
+         WHERE ${where} ORDER BY c.id DESC LIMIT ${limit}`,
+        params
+      );
+      rows.reverse();
+    } else {
+      [rows] = await pool.execute(
+        `SELECT c.id, c.comment_text, c.created_at, u.username
+         FROM post_comments c JOIN users u ON u.id = c.user_id
+         WHERE c.post_id = ? ORDER BY c.id ASC`,
+        [postId]
+      );
+    }
+
+    res.json({ comments: rows, total: Number(total) });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: 'Server error' });

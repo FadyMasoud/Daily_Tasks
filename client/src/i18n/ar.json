@@ -115,6 +115,10 @@
   "saving": "جاري الحفظ...",
 
   "comment_placeholder": "اكتب تعليقاً...",
+  "comments_title": "التعليقات",
+  "view_previous_comments": "عرض التعليقات السابقة",
+  "see_more": "عرض المزيد",
+  "see_less": "عرض أقل",
   "no_comments": "لا توجد تعليقات بعد",
   "loading_comments": "جاري التحميل...",
   "copy_text": "نسخ",

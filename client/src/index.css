@@ -48,5 +48,14 @@
 
 @layer base {
   * { @apply border-border; }
+  /* Larger base type for better readability (user base is 40+ with reduced vision).
+     Everything in the UI is rem-based, so this scales all text, spacing and controls
+     proportionally. 112.5% = 18px base (browser default is 16px). */
+  html { font-size: 112.5%; }
   body { @apply bg-background text-foreground; }
+}
+
+/* Slightly narrower bump on very small phones so wide controls don't overflow. */
+@media (max-width: 380px) {
+  html { font-size: 106.25%; } /* 17px */
 }

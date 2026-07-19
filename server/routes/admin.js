@@ -8,7 +8,9 @@ const router = express.Router();
 // GET /api/admin/submissions — paginated with filters (username, task_id, date)
 router.get('/submissions', auth, adminOnly, async (req, res) => {
   const { user_id, task_id, username, date, page = 1, limit = 20 } = req.query;
-  const offset = (parseInt(page) - 1) * parseInt(limit);
+  const safeLimit  = Math.min(Math.max(parseInt(limit, 10) || 20, 1), 100);
+  const safePage   = Math.max(parseInt(page, 10) || 1, 1);
+  const offset     = (safePage - 1) * safeLimit;
 
   const conditions = [];
   const values = [];
@@ -37,8 +39,8 @@ router.get('/submissions', auth, adminOnly, async (req, res) => {
        JOIN tasks t ON s.task_id = t.id
        ${where}
        ORDER BY s.submitted_at DESC
-       LIMIT ? OFFSET ?`,
-      [...values, parseInt(limit), offset]
+       LIMIT ${safeLimit} OFFSET ${offset}`,
+      values
     );
 
     const withAnswers = await Promise.all(rows.map(async row => {
@@ -54,9 +56,9 @@ router.get('/submissions', auth, adminOnly, async (req, res) => {
     res.json({
       data: withAnswers,
       total: parseInt(total),
-      page: parseInt(page),
-      limit: parseInt(limit),
-      pages: Math.ceil(total / parseInt(limit)),
+      page: safePage,
+      limit: safeLimit,
+      pages: Math.ceil(total / safeLimit),
     });
   } catch (err) {
     console.error(err);

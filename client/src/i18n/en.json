@@ -115,6 +115,10 @@
   "saving": "Saving...",
 
   "comment_placeholder": "Write a comment...",
+  "comments_title": "Comments",
+  "view_previous_comments": "View previous comments",
+  "see_more": "See more",
+  "see_less": "See less",
   "no_comments": "No comments yet",
   "loading_comments": "Loading...",
   "copy_text": "Copy",

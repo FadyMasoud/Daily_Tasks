@@ -1,7 +1,12 @@
 const { Resend } = require('resend');
 const pool = require('../db');
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+if (!process.env.RESEND_API_KEY) {
+  console.warn('RESEND_API_KEY not set — emails will be skipped (logged as failed).');
+}
+const resend = process.env.RESEND_API_KEY
+  ? new Resend(process.env.RESEND_API_KEY)
+  : null;
 const APP_URL = process.env.CLIENT_URL || 'http://localhost:5173';
 
 async function sendNewTaskEmail(user, task) {
@@ -13,16 +18,20 @@ async function sendNewTaskEmail(user, task) {
     : `<h2>New Task Available</h2><p>Hello ${user.username},</p><p>A new task has been published: <strong>${title}</strong></p><p><a href="${APP_URL}/user/tasks">Click here to start</a></p>`;
 
   let status = 'sent';
-  try {
-    await resend.emails.send({
-      from: 'Daily Tasks <onboarding@resend.dev>',
-      to: user.email,
-      subject,
-      html,
-    });
-  } catch (err) {
-    console.error('sendNewTaskEmail error:', err.message);
+  if (!resend) {
     status = 'failed';
+  } else {
+    try {
+      await resend.emails.send({
+        from: 'Daily Tasks <onboarding@resend.dev>',
+        to: user.email,
+        subject,
+        html,
+      });
+    } catch (err) {
+      console.error('sendNewTaskEmail error:', err.message);
+      status = 'failed';
+    }
   }
 
   try {
@@ -47,16 +56,20 @@ async function sendReminderEmail(user, pendingTasks) {
     : `<h2>Pending Tasks Reminder</h2><p>Hello ${user.username},</p><p>You have the following tasks pending:</p><ul>${taskList}</ul><p><a href="${APP_URL}/user/tasks">Click here to complete them</a></p>`;
 
   let status = 'sent';
-  try {
-    await resend.emails.send({
-      from: 'Daily Tasks <onboarding@resend.dev>',
-      to: user.email,
-      subject,
-      html,
-    });
-  } catch (err) {
-    console.error('sendReminderEmail error:', err.message);
+  if (!resend) {
     status = 'failed';
+  } else {
+    try {
+      await resend.emails.send({
+        from: 'Daily Tasks <onboarding@resend.dev>',
+        to: user.email,
+        subject,
+        html,
+      });
+    } catch (err) {
+      console.error('sendReminderEmail error:', err.message);
+      status = 'failed';
+    }
   }
 
   try {

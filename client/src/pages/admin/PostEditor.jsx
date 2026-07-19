@@ -2,15 +2,18 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
 import { useTranslation } from 'react-i18next';
+import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../components/ui/toast';
 import { Button } from '../../components/ui/button';
-import { Upload, ImageOff, X, ArrowRight } from 'lucide-react';
+import CommentsThread from '../../components/CommentsThread';
+import { Upload, X, ArrowRight, MessageCircle } from 'lucide-react';
 
 export default function PostEditor() {
   const { id } = useParams();
   const isEdit = !!id;
   const navigate = useNavigate();
   const { t } = useTranslation();
+  const { user } = useAuth();
   const { toast } = useToast();
   const fileRef = useRef(null);
 
@@ -20,6 +23,7 @@ export default function PostEditor() {
   const [dragging, setDragging] = useState(false);
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(isEdit);
+  const [commentCount, setCommentCount] = useState(0);
 
   useEffect(() => {
     if (!isEdit) return;
@@ -85,7 +89,7 @@ export default function PostEditor() {
   if (fetching) return <div className="py-16 text-center text-muted-foreground">{t('loading')}</div>;
 
   return (
-    <div className="max-w-xl mx-auto">
+    <div className={isEdit ? 'max-w-5xl mx-auto' : 'max-w-xl mx-auto'}>
       <button
         onClick={() => navigate('/admin/posts')}
         className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground mb-5 transition-colors"
@@ -94,9 +98,11 @@ export default function PostEditor() {
         {t('back_to_reflections')}
       </button>
 
-      <h1 className="text-xl font-bold mb-6">{isEdit ? t('edit_reflection') : t('new_reflection')}</h1>
+      <div className={isEdit ? 'lg:grid lg:grid-cols-[minmax(0,1fr)_360px] lg:gap-6 lg:items-start' : ''}>
+        <div>
+          <h1 className="text-xl font-bold mb-6">{isEdit ? t('edit_reflection') : t('new_reflection')}</h1>
 
-      <form onSubmit={handleSubmit} className="space-y-5">
+          <form onSubmit={handleSubmit} className="space-y-5">
         <div className="space-y-2">
           <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
             {t('image_optional')}
@@ -152,15 +158,40 @@ export default function PostEditor() {
           <p className="text-xs text-muted-foreground text-end">{t('chars_count', { n: description.length })}</p>
         </div>
 
-        <div className="flex gap-3 pt-1">
-          <Button type="button" variant="outline" onClick={() => navigate('/admin/posts')}>
-            {t('cancel')}
-          </Button>
-          <Button type="submit" disabled={loading}>
-            {loading ? t('saving') : isEdit ? t('save_changes') : t('publish')}
-          </Button>
+            <div className="flex gap-3 pt-1">
+              <Button type="button" variant="outline" onClick={() => navigate('/admin/posts')}>
+                {t('cancel')}
+              </Button>
+              <Button type="submit" disabled={loading}>
+                {loading ? t('saving') : isEdit ? t('save_changes') : t('publish')}
+              </Button>
+            </div>
+          </form>
         </div>
-      </form>
+
+        {isEdit && (
+          <aside className="mt-8 lg:mt-0 lg:sticky lg:top-6">
+            <div className="bg-card border border-border rounded-md shadow-sm flex flex-col lg:max-h-[calc(100vh-7rem)]">
+              <div className="px-4 py-3 border-b border-border flex items-center gap-2">
+                <MessageCircle size={16} className="text-primary" />
+                <h2 className="text-sm font-semibold text-foreground">
+                  {t('comments_title')}
+                  {commentCount > 0 && <span className="text-muted-foreground font-normal"> · {commentCount}</span>}
+                </h2>
+              </div>
+              <CommentsThread
+                postId={id}
+                currentUser={user}
+                initialCount={8}
+                pageSize={10}
+                scroll
+                onCountChange={setCommentCount}
+                className="flex flex-col flex-1 min-h-0 px-4 py-3"
+              />
+            </div>
+          </aside>
+        )}
+      </div>
     </div>
   );
 }
