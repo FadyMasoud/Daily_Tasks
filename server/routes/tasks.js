@@ -73,7 +73,7 @@ router.get('/template', auth, adminOnly, (req, res) => {
 
   const rows = [
     // Row 1 = topic (skipped by parser). Col A = Arabic, Col B = English (optional)
-    ['اكتب موضوع المهمة هنا', ''],
+    ['اكتب موضوع القراءة هنا', ''],
     ['ماذا تعلمت اليوم؟', 'What did you learn today?'],
     ['ما هو أكبر تحدٍّ واجهته؟', 'What was your biggest challenge?'],
     ['ما الذي تشعر بالامتنان له؟', 'What are you grateful for?'],
@@ -151,7 +151,7 @@ router.get('/:id', auth, async (req, res) => {
 // POST /api/tasks — create task (admin)
 router.post('/', auth, adminOnly, async (req, res) => {
   const { title, title_ar, description, description_ar, requires_previous = 0, auto_schedule = 0, scheduled_at } = req.body;
-  if (!title_ar) return res.status(400).json({ message: 'اسم المهمة (عربي) مطلوب' });
+  if (!title_ar) return res.status(400).json({ message: 'اسم القراءة (عربي) مطلوب' });
 
   try {
     const [result] = await pool.execute(

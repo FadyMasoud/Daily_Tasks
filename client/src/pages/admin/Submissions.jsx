@@ -131,7 +131,7 @@ export default function AdminSubmissions() {
                 <tr>
                   <th className="px-4 py-3 text-start font-medium">{t('username_col')}</th>
                   <th className="px-4 py-3 text-start font-medium">{t('email')}</th>
-                  <th className="px-4 py-3 text-start font-medium">المهمة</th>
+                  <th className="px-4 py-3 text-start font-medium">القراءة</th>
                   <th className="px-4 py-3 text-start font-medium">{t('submitted_at')}</th>
                   <th className="px-4 py-3 text-center font-medium"></th>
                 </tr>

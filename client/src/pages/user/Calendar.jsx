@@ -191,8 +191,8 @@ export default function UserCalendar() {
           </div>
           <p className="text-xs text-muted-foreground mt-0.5">
             {selectedTasks.length > 0
-              ? `${selectedTasks.length} ${isAr ? 'مهمة' : 'task(s)'}`
-              : isAr ? 'لا توجد مهام' : 'No tasks'}
+              ? `${selectedTasks.length} ${isAr ? 'قراءة' : 'task(s)'}`
+              : isAr ? 'لا توجد قراءات' : 'No tasks'}
           </p>
         </div>
 
@@ -201,7 +201,7 @@ export default function UserCalendar() {
           {selectedTasks.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-48 text-muted-foreground text-center">
               <CalendarDays size={44} className="mb-3 opacity-20" />
-              <p className="text-sm">{isAr ? 'لا توجد مهام في هذا اليوم' : 'No tasks on this day'}</p>
+              <p className="text-sm">{isAr ? 'لا توجد قراءات في هذا اليوم' : 'No tasks on this day'}</p>
             </div>
           ) : selectedTasks.map(task => (
             <div
@@ -222,8 +222,8 @@ export default function UserCalendar() {
                   : task.locked
                   ? <Lock        size={15} className="text-muted-foreground mt-0.5 shrink-0" />
                   : <Clock       size={15} className="text-[#A07830] mt-0.5 shrink-0" />}
-                <div>
-                  <p className="text-sm font-medium leading-snug">
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-medium leading-snug truncate">
                     {isAr && task.title_ar ? task.title_ar : task.title}
                   </p>
                   <p className={`text-xs mt-0.5 ${

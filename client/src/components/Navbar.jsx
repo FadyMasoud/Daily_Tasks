@@ -3,7 +3,11 @@ import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from './ui/toast';
 import { useConfirm } from './ui/confirm-dialog';
-import { Sun, Moon, LogOut, BookOpen, CalendarDays, Menu, X } from 'lucide-react';
+import {
+  Sun, Moon, LogOut, BookOpen, CalendarDays, Menu, X,
+  ListChecks, Upload, Inbox, Newspaper, History,
+} from 'lucide-react';
+import { EgyptFlag, USAFlag } from './Flags';
 import { useState, useEffect } from 'react';
 
 export default function Navbar() {
@@ -48,17 +52,17 @@ export default function Navbar() {
   };
 
   const adminLinks = [
-    { to: '/admin/tasks',       label: t('task_list') },
-    { to: '/admin/upload',      label: t('upload_task') },
-    { to: '/admin/submissions', label: t('submissions') },
-    { to: '/admin/posts',       label: t('nav_feed') },
+    { to: '/admin/tasks',       label: t('task_list'),   icon: <ListChecks size={19} /> },
+    { to: '/admin/upload',      label: t('upload_task'), icon: <Upload size={19} /> },
+    { to: '/admin/submissions', label: t('submissions'), icon: <Inbox size={19} /> },
+    { to: '/admin/posts',       label: t('nav_feed'),    icon: <Newspaper size={19} /> },
   ];
 
   const userLinks = [
-    { to: '/user/calendar', label: t('nav_calendar'), icon: <CalendarDays size={13} /> },
-    { to: '/user/tasks',    label: t('my_tasks') },
-    { to: '/user/feed',     label: t('nav_feed') },
-    { to: '/user/history',  label: t('history') },
+    { to: '/user/calendar', label: t('nav_calendar'), icon: <CalendarDays size={19} /> },
+    { to: '/user/tasks',    label: t('my_tasks'),     icon: <BookOpen size={19} /> },
+    { to: '/user/feed',     label: t('nav_feed'),     icon: <Newspaper size={19} /> },
+    { to: '/user/history',  label: t('history'),      icon: <History size={19} /> },
   ];
 
   const links = user?.role === 'admin' ? adminLinks : userLinks;
@@ -76,23 +80,24 @@ export default function Navbar() {
             className="flex items-center gap-2 font-bold text-primary tracking-wide shrink-0"
           >
             <BookOpen size={18} />
-            <span className="hidden sm:inline text-sm">قراءات يومية</span>
+            <span className="hidden sm:inline text-sm">{t('app_title')}</span>
           </Link>
 
-          {/* Desktop nav links */}
+          {/* Desktop nav links — icon stacked over label */}
           {user && (
-            <nav className="hidden md:flex items-center gap-1 flex-1 justify-center">
+            <nav className="hidden md:flex items-stretch gap-1 flex-1 justify-center">
               {links.map(link => (
                 <Link
                   key={link.to}
                   to={link.to}
-                  className={`flex items-center gap-1 text-sm px-3 py-1.5 rounded transition-colors ${
+                  className={`flex flex-col items-center justify-center gap-1 px-3 pt-1.5 pb-1 border-b-2 transition-colors ${
                     isActive(link.to)
-                      ? 'text-primary font-semibold underline underline-offset-4'
-                      : 'text-foreground hover:text-primary hover:underline underline-offset-4'
+                      ? 'text-primary border-primary font-semibold'
+                      : 'text-muted-foreground border-transparent hover:text-primary'
                   }`}
                 >
-                  {link.icon}{link.label}
+                  {link.icon}
+                  <span className="text-[11px] leading-none whitespace-nowrap">{link.label}</span>
                 </Link>
               ))}
             </nav>
@@ -102,9 +107,11 @@ export default function Navbar() {
           <div className="flex items-center gap-1.5 shrink-0">
             <button
               onClick={toggleLang}
-              className="text-xs font-semibold px-2.5 py-1 rounded border border-border hover:bg-accent transition-colors tracking-wide"
+              title={i18n.language === 'ar' ? 'Switch to English' : 'التبديل إلى العربية'}
+              aria-label={i18n.language === 'ar' ? 'Switch to English' : 'التبديل إلى العربية'}
+              className="flex items-center p-1 rounded border border-border hover:bg-accent transition-colors overflow-hidden leading-none"
             >
-              {i18n.language === 'ar' ? 'EN' : 'عربي'}
+              {i18n.language === 'ar' ? <USAFlag className="rounded-[2px]" /> : <EgyptFlag className="rounded-[2px]" />}
             </button>
             <button
               onClick={() => setDark(d => !d)}

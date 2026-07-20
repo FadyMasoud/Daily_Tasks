@@ -48,7 +48,7 @@ export default function Login() {
             {/* Brand */}
             <div className="flex items-center justify-center gap-2 mb-7">
               <BookOpen size={22} className="text-primary" />
-              <span className="font-bold text-lg text-foreground tracking-widest">قراءات يومية</span>
+              <span className="font-bold text-lg text-foreground tracking-widest">{t('app_title')}</span>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-4">

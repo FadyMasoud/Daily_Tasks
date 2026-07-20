@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
@@ -7,7 +7,11 @@ import { Badge } from '../../components/ui/badge';
 import { Input } from '../../components/ui/input';
 import { useToast } from '../../components/ui/toast';
 import { useConfirm } from '../../components/ui/confirm-dialog';
-import { Pencil, Trash2, Plus, Check, X } from 'lucide-react';
+import { Pencil, Trash2, Plus, Check, X, Search } from 'lucide-react';
+
+const EMPTY_FILTERS = {
+  name: '', scheduled: '', auto: 'all', published: 'all', requires: 'all', questions: '',
+};
 
 export default function AdminTaskList() {
   const { t, i18n } = useTranslation();
@@ -17,6 +21,8 @@ export default function AdminTaskList() {
   const [loading, setLoading] = useState(true);
   const [editingId, setEditingId] = useState(null);
   const [editSchedule, setEditSchedule] = useState('');
+  const [search, setSearch] = useState('');
+  const [filters, setFilters] = useState(EMPTY_FILTERS);
 
   const isAr = i18n.language === 'ar';
 
@@ -70,21 +76,74 @@ export default function AdminTaskList() {
     }
   };
 
+  // ── Filtering: general search + per-column filters ──
+  const norm = (v) => (v ?? '').toString().toLowerCase();
+  const setFilter = (key, val) => setFilters(f => ({ ...f, [key]: val }));
+
+  const filtered = useMemo(() => {
+    const g = norm(search).trim();
+    return tasks.filter(task => {
+      const scheduledStr = task.scheduled_at ? new Date(task.scheduled_at).toLocaleString() : '';
+      const nameHay = `${task.title || ''} ${task.title_ar || ''}`;
+
+      if (g) {
+        const hay = norm(`${nameHay} ${scheduledStr} ${task.question_count || 0}`);
+        if (!hay.includes(g)) return false;
+      }
+      if (filters.name && !norm(nameHay).includes(norm(filters.name))) return false;
+      if (filters.scheduled && !norm(scheduledStr).includes(norm(filters.scheduled))) return false;
+      if (filters.auto !== 'all' && !!task.auto_schedule !== (filters.auto === 'yes')) return false;
+      if (filters.published !== 'all' && !!task.is_published !== (filters.published === 'yes')) return false;
+      if (filters.requires !== 'all' && !!task.requires_previous !== (filters.requires === 'yes')) return false;
+      if (filters.questions && !norm(task.question_count || 0).includes(norm(filters.questions))) return false;
+      return true;
+    });
+  }, [tasks, search, filters]);
+
+  const hasActiveFilters = search || Object.keys(EMPTY_FILTERS).some(k => filters[k] !== EMPTY_FILTERS[k]);
+  const clearAll = () => { setSearch(''); setFilters(EMPTY_FILTERS); };
+
+  // Reusable Yes/No/All column select
+  const BoolFilter = ({ value, onChange }) => (
+    <select
+      value={value}
+      onChange={e => onChange(e.target.value)}
+      className="h-8 w-full text-xs px-1.5 rounded-md border border-input bg-transparent focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+    >
+      <option value="all">{isAr ? 'الكل' : 'All'}</option>
+      <option value="yes">{isAr ? 'نعم' : 'Yes'}</option>
+      <option value="no">{isAr ? 'لا' : 'No'}</option>
+    </select>
+  );
+
   if (loading) return <div className="p-8 text-center">{t('loading')}</div>;
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between gap-4 flex-wrap mb-6">
         <h1 className="text-2xl font-bold">{t('task_list')}</h1>
-        <Link to="/admin/upload">
-          <Button size="sm"><Plus size={14} className="mr-1" />{t('upload_task')}</Button>
-        </Link>
+        <div className="flex items-center gap-2">
+          {/* General search */}
+          <div className="relative">
+            <Search size={14} className="absolute start-2.5 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
+            <Input
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              placeholder={isAr ? 'بحث عام...' : 'Search all...'}
+              className="h-9 w-44 sm:w-56 ps-8"
+            />
+          </div>
+          <Link to="/admin/upload">
+            <Button size="sm"><Plus size={14} className="mr-1" />{t('upload_task')}</Button>
+          </Link>
+        </div>
       </div>
 
       <div className="rounded-xl border overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead className="bg-muted">
+              {/* Column labels */}
               <tr>
                 <th className="px-4 py-3 text-start font-medium">#</th>
                 <th className="px-4 py-3 text-start font-medium">{t('task_name_en')}</th>
@@ -95,11 +154,59 @@ export default function AdminTaskList() {
                 <th className="px-4 py-3 text-center font-medium">{t('questions_count')}</th>
                 <th className="px-4 py-3 text-center font-medium">{t('actions')}</th>
               </tr>
+              {/* Per-column search row */}
+              <tr className="bg-muted/50 border-t border-border">
+                <th className="px-2 py-2" />
+                <th className="px-2 py-2">
+                  <Input
+                    value={filters.name}
+                    onChange={e => setFilter('name', e.target.value)}
+                    placeholder={isAr ? 'بحث بالاسم' : 'Name'}
+                    className="h-8 text-xs"
+                  />
+                </th>
+                <th className="px-2 py-2">
+                  <Input
+                    value={filters.scheduled}
+                    onChange={e => setFilter('scheduled', e.target.value)}
+                    placeholder={isAr ? 'التاريخ' : 'Date'}
+                    className="h-8 text-xs"
+                  />
+                </th>
+                <th className="px-2 py-2"><BoolFilter value={filters.auto} onChange={v => setFilter('auto', v)} /></th>
+                <th className="px-2 py-2"><BoolFilter value={filters.published} onChange={v => setFilter('published', v)} /></th>
+                <th className="px-2 py-2"><BoolFilter value={filters.requires} onChange={v => setFilter('requires', v)} /></th>
+                <th className="px-2 py-2">
+                  <Input
+                    value={filters.questions}
+                    onChange={e => setFilter('questions', e.target.value)}
+                    placeholder="#"
+                    className="h-8 text-xs text-center"
+                  />
+                </th>
+                <th className="px-2 py-2 text-center">
+                  {hasActiveFilters && (
+                    <button
+                      onClick={clearAll}
+                      title={isAr ? 'مسح الفلاتر' : 'Clear filters'}
+                      className="inline-flex items-center justify-center h-8 w-8 rounded-md border border-border text-muted-foreground hover:text-destructive hover:border-destructive/50 transition-colors"
+                    >
+                      <X size={14} />
+                    </button>
+                  )}
+                </th>
+              </tr>
             </thead>
             <tbody className="divide-y divide-border">
-              {tasks.length === 0 ? (
-                <tr><td colSpan={8} className="px-4 py-8 text-center text-muted-foreground">{t('no_tasks')}</td></tr>
-              ) : tasks.map((task, idx) => (
+              {filtered.length === 0 ? (
+                <tr>
+                  <td colSpan={8} className="px-4 py-8 text-center text-muted-foreground">
+                    {hasActiveFilters
+                      ? (isAr ? 'لا توجد نتائج مطابقة' : 'No matching results')
+                      : t('no_tasks')}
+                  </td>
+                </tr>
+              ) : filtered.map((task, idx) => (
                 <tr key={task.id} className="hover:bg-muted/30 transition-colors">
                   <td className="px-4 py-3 text-muted-foreground">{idx + 1}</td>
                   <td className="px-4 py-3">
@@ -161,6 +268,13 @@ export default function AdminTaskList() {
           </table>
         </div>
       </div>
+
+      {/* Result count */}
+      {hasActiveFilters && (
+        <p className="text-xs text-muted-foreground mt-3 text-center">
+          {filtered.length} / {tasks.length} {isAr ? 'نتيجة' : 'results'}
+        </p>
+      )}
     </div>
   );
 }

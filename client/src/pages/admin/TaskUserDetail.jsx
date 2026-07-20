@@ -55,7 +55,7 @@ export default function TaskUserDetail() {
               <BookOpen size={18} className="text-primary-foreground" />
             </div>
             <div>
-              <p className="text-xs text-primary-foreground/70 font-medium mb-0.5">المهمة</p>
+              <p className="text-xs text-primary-foreground/70 font-medium mb-0.5">القراءة</p>
               <h1 className="text-lg font-bold leading-snug text-primary-foreground">{taskTitle}</h1>
             </div>
           </div>

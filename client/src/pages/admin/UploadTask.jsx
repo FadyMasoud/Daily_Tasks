@@ -176,6 +176,21 @@ export default function UploadTask() {
   // ── Submit ─────────────────────────────────────────────────
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // ── Validation: name, date, and at least one question ──
+    if (!form.title_ar.trim()) {
+      return toast({ title: t('error'), description: 'اسم القراءة (عربي) مطلوب', variant: 'destructive' });
+    }
+    if (!form.scheduled_at) {
+      return toast({ title: t('error'), description: 'التاريخ مطلوب', variant: 'destructive' });
+    }
+    const questionCount = questionMode === 'manual'
+      ? manualQuestions.length
+      : (previewQuestions.length || (isEdit ? existingQuestions.length : 0));
+    if (questionCount < 1) {
+      return toast({ title: t('error'), description: 'أضف سؤالاً واحداً على الأقل', variant: 'destructive' });
+    }
+
     setLoading(true);
     try {
       let taskId = editId;
@@ -207,7 +222,7 @@ export default function UploadTask() {
 
       toast({
         title: t('success'),
-        description: isEdit ? 'تم حفظ التعديلات بنجاح!' : 'تم إنشاء المهمة بنجاح!',
+        description: isEdit ? 'تم حفظ التعديلات بنجاح!' : 'تم إنشاء القراءة بنجاح!',
       });
       navigate('/admin/tasks');
     } catch (err) {
@@ -226,7 +241,7 @@ export default function UploadTask() {
       <div className="flex items-center gap-2 mb-6">
         {isEdit ? <Pencil size={20} className="text-primary" /> : <Plus size={20} className="text-primary" />}
         <h1 className="text-2xl font-bold">
-          {isEdit ? 'تعديل المهمة' : t('upload_task')}
+          {isEdit ? 'تعديل القراءة' : t('upload_task')}
         </h1>
         {isEdit && (
           <span className="ml-2 text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full font-medium">
@@ -239,7 +254,7 @@ export default function UploadTask() {
 
         {/* ── Task info card ── */}
         <Card>
-          <CardHeader><CardTitle>معلومات المهمة</CardTitle></CardHeader>
+          <CardHeader><CardTitle>معلومات القراءة</CardTitle></CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-1.5">
@@ -274,7 +289,7 @@ export default function UploadTask() {
               </label>
 
               <div className="space-y-1.5">
-                <Label>{form.auto_schedule ? t('schedule_date') : t('schedule_datetime')}</Label>
+                <Label>{form.auto_schedule ? t('schedule_date') : t('schedule_datetime')} *</Label>
                 <Input
                   type={form.auto_schedule ? 'date' : 'datetime-local'}
                   value={form.scheduled_at}

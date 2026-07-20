@@ -23,26 +23,34 @@
     --input: 36 35% 78%;
     --ring: 347 46% 33%;
     --radius: 0.375rem;
+    /* Status accents — muted, palette-friendly */
+    --success: 145 32% 33%;
+    --warning: 30 52% 40%;
   }
 
+  /* Dark theme — calm, classic, low-glare sepia palette for readers:
+     soft warm charcoal background, gentle cream text (not pure white),
+     one muted amber accent. */
   .dark {
-    --background: 22 40% 8%;
-    --foreground: 40 50% 90%;
-    --card: 22 35% 12%;
-    --card-foreground: 40 50% 90%;
-    --primary: 40 54% 50%;
-    --primary-foreground: 22 57% 12%;
-    --secondary: 22 30% 18%;
-    --secondary-foreground: 40 50% 90%;
-    --muted: 22 30% 18%;
-    --muted-foreground: 36 30% 60%;
-    --accent: 22 30% 18%;
-    --accent-foreground: 40 50% 90%;
-    --destructive: 0 62% 40%;
-    --destructive-foreground: 40 60% 96%;
-    --border: 22 30% 22%;
-    --input: 22 30% 22%;
-    --ring: 40 54% 50%;
+    --background: 30 14% 10%;
+    --foreground: 38 28% 84%;
+    --card: 30 13% 14%;
+    --card-foreground: 38 28% 84%;
+    --primary: 32 40% 62%;
+    --primary-foreground: 30 25% 12%;
+    --secondary: 30 12% 20%;
+    --secondary-foreground: 38 28% 84%;
+    --muted: 30 10% 19%;
+    --muted-foreground: 35 15% 62%;
+    --accent: 30 12% 21%;
+    --accent-foreground: 38 28% 84%;
+    --destructive: 5 42% 48%;
+    --destructive-foreground: 38 28% 88%;
+    --border: 30 12% 23%;
+    --input: 30 12% 23%;
+    --ring: 32 40% 62%;
+    --success: 150 22% 55%;
+    --warning: 34 42% 60%;
   }
 }
 

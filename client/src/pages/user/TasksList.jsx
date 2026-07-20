@@ -2,14 +2,14 @@ import { useState, useEffect, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { Badge } from '../../components/ui/badge';
 import { Input } from '../../components/ui/input';
+import { Select } from '../../components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../../components/ui/dialog';
 import { useToast } from '../../components/ui/toast';
 import useMediaQuery from '../../hooks/useMediaQuery';
 import {
-  CheckCircle2, Lock, BookOpen, Calendar, CalendarSearch,
-  MessageSquare, X, Play, Eye, Trophy, ListChecks, Circle, SlidersHorizontal,
+  CheckCircle2, Lock, BookOpen, CalendarSearch,
+  MessageSquare, X, Search, ChevronDown,
 } from 'lucide-react';
 
 const PAGE_SIZE = 6;
@@ -34,7 +34,7 @@ function Paginator({ page, total, pageSize, onPageChange }) {
       <button
         onClick={() => onPageChange(page - 1)}
         disabled={page === 1}
-        className="px-3 py-2 rounded-md border border-border text-sm text-muted-foreground hover:bg-accent hover:text-foreground disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+        className="px-3 py-2 border border-border text-sm text-muted-foreground hover:bg-accent hover:text-foreground disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
       >
         ‹
       </button>
@@ -45,9 +45,9 @@ function Paginator({ page, total, pageSize, onPageChange }) {
           <button
             key={p}
             onClick={() => onPageChange(p)}
-            className={`min-w-[38px] py-2 rounded-md border text-sm font-medium transition-colors ${
+            className={`min-w-[38px] py-2 border text-sm font-medium transition-colors ${
               p === page
-                ? 'border-primary bg-primary text-primary-foreground shadow-sm'
+                ? 'border-primary bg-primary text-primary-foreground'
                 : 'border-border hover:bg-accent text-foreground'
             }`}
           >
@@ -58,7 +58,7 @@ function Paginator({ page, total, pageSize, onPageChange }) {
       <button
         onClick={() => onPageChange(page + 1)}
         disabled={page === Math.ceil(total / pageSize)}
-        className="px-3 py-2 rounded-md border border-border text-sm text-muted-foreground hover:bg-accent hover:text-foreground disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+        className="px-3 py-2 border border-border text-sm text-muted-foreground hover:bg-accent hover:text-foreground disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
       >
         ›
       </button>
@@ -66,7 +66,7 @@ function Paginator({ page, total, pageSize, onPageChange }) {
   );
 }
 
-// ── Task card ─────────────────────────────────────────────────
+// ── Task card (sharp, classic) ────────────────────────────────
 function TaskCard({ task, isAr, t, onClick, sc }) {
   const title = isAr && task.title_ar ? task.title_ar : task.title;
   const desc  = isAr && task.description_ar ? task.description_ar : task.description;
@@ -77,139 +77,55 @@ function TaskCard({ task, isAr, t, onClick, sc }) {
       onClick={() => onClick(task)}
       disabled={task.locked}
       title={task.locked ? t('complete_previous') : ''}
-      className={`group text-start flex flex-col h-full rounded-xl border bg-card overflow-hidden transition-all duration-200 ${sc.border} ${
-        task.locked
-          ? 'opacity-60 cursor-not-allowed'
-          : 'cursor-pointer hover:shadow-lg hover:-translate-y-1'
+      className={`group text-start flex flex-col h-full min-w-0 bg-card border border-border border-s-[3px] shadow-sm transition-shadow ${sc.accent} ${
+        task.locked ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer hover:shadow-md'
       }`}
     >
-      {/* Colored status strip */}
-      <div className={`h-1.5 w-full ${sc.bar}`} />
-
-      <div className="p-5 flex flex-col flex-1">
-        {/* Icon + status badge */}
-        <div className="flex items-center justify-between mb-3">
-          <div className={`w-12 h-12 rounded-2xl grid place-items-center ${sc.iconBg}`}>
+      <div className="p-4 flex flex-col flex-1 min-w-0">
+        {/* Status label + date */}
+        <div className="flex items-center justify-between gap-2 mb-2">
+          <span className={`inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide ${sc.labelClass}`}>
             {sc.icon}
-          </div>
-          <Badge variant={sc.badge}>{sc.label}</Badge>
-        </div>
-
-        {/* Title */}
-        <h3 className="font-bold text-lg leading-snug text-foreground">
-          {title}
-        </h3>
-
-        {/* Description */}
-        {desc && (
-          <p className="text-sm text-muted-foreground line-clamp-2 mt-1.5 leading-relaxed">
-            {desc}
-          </p>
-        )}
-
-        <div className="flex-1" />
-
-        {/* Meta chips */}
-        <div className="flex flex-wrap items-center gap-2 mt-4">
+            {sc.label}
+          </span>
           {task.scheduled_at && (
-            <span className="flex items-center gap-1.5 text-xs text-muted-foreground bg-muted/60 rounded-full px-2.5 py-1">
-              <Calendar size={13} />
+            <span className="text-xs text-muted-foreground">
               {new Date(task.scheduled_at).toLocaleDateString(
                 isAr ? 'ar-EG' : 'en-US',
                 { day: 'numeric', month: 'short', year: 'numeric' }
               )}
             </span>
           )}
-          {task.question_count > 0 && (
-            <span className="flex items-center gap-1.5 text-xs text-muted-foreground bg-muted/60 rounded-full px-2.5 py-1">
+        </div>
+
+        {/* Title with underline rule */}
+        <h3 className="font-bold text-base leading-snug text-foreground border-b border-border pb-2 mb-2 truncate">
+          {title}
+        </h3>
+
+        {/* Description */}
+        {desc && (
+          <p className="text-sm text-muted-foreground line-clamp-2 leading-relaxed break-words">
+            {desc}
+          </p>
+        )}
+
+        <div className="flex-1" />
+
+        {/* Footer: question count + action link */}
+        <div className="flex items-center justify-between gap-2 mt-3 pt-3 border-t border-border">
+          {task.question_count > 0 ? (
+            <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
               <MessageSquare size={13} />
               {task.question_count} {isAr ? 'سؤال' : task.question_count === 1 ? 'question' : 'questions'}
             </span>
-          )}
-        </div>
-
-        {/* Action button */}
-        <div
-          className={`mt-4 flex items-center justify-center gap-2 rounded-lg py-2.5 text-sm font-semibold transition-colors ${sc.ctaClass}`}
-        >
-          {sc.ctaIcon}
-          {sc.ctaLabel}
+          ) : <span />}
+          <span className={`text-sm font-semibold group-hover:underline underline-offset-2 ${sc.ctaClass}`}>
+            {sc.ctaLabel} {isAr ? '←' : '→'}
+          </span>
         </div>
       </div>
     </button>
-  );
-}
-
-// ── Filters (shared between sidebar on desktop and top block on mobile) ──
-function Filters({ isAr, statusFilter, setStatusFilter, statusOptions, dateFrom, dateTo, setDateFrom, setDateTo, resetView }) {
-  return (
-    <div className="space-y-5">
-      {/* Status filter */}
-      <div>
-        <div className="flex items-center gap-2 mb-2.5 text-muted-foreground">
-          <SlidersHorizontal size={15} />
-          <span className="text-sm font-semibold">{isAr ? 'الحالة' : 'Status'}</span>
-        </div>
-        <div className="flex flex-col gap-2">
-          {statusOptions.map(o => {
-            const active = statusFilter === o.key;
-            return (
-              <button
-                key={o.key}
-                onClick={() => { setStatusFilter(o.key); resetView(); }}
-                className={`w-full flex items-center justify-between gap-2 rounded-lg px-3 py-2.5 text-sm font-medium border transition-colors ${
-                  active ? o.activeClass : 'border-border text-foreground hover:bg-muted/60'
-                }`}
-              >
-                <span className="flex items-center gap-2">{o.icon}{o.label}</span>
-                <span className={`text-xs rounded-full px-2 py-0.5 font-semibold ${
-                  active ? 'bg-white/25 text-white' : 'bg-muted text-muted-foreground'
-                }`}>
-                  {o.count}
-                </span>
-              </button>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* Date filter */}
-      <div>
-        <div className="flex items-center gap-2 mb-2.5 text-muted-foreground">
-          <CalendarSearch size={15} />
-          <span className="text-sm font-semibold">{isAr ? 'التاريخ' : 'Date'}</span>
-        </div>
-        <div className="space-y-2">
-          <div>
-            <label className="text-xs text-muted-foreground block mb-1">{isAr ? 'من' : 'From'}</label>
-            <Input
-              type="date"
-              value={dateFrom}
-              onChange={e => { setDateFrom(e.target.value); resetView(); }}
-              className="h-9 w-full text-sm px-2"
-            />
-          </div>
-          <div>
-            <label className="text-xs text-muted-foreground block mb-1">{isAr ? 'إلى' : 'To'}</label>
-            <Input
-              type="date"
-              value={dateTo}
-              onChange={e => { setDateTo(e.target.value); resetView(); }}
-              className="h-9 w-full text-sm px-2"
-            />
-          </div>
-          {(dateFrom || dateTo) && (
-            <button
-              onClick={() => { setDateFrom(''); setDateTo(''); resetView(); }}
-              className="flex items-center gap-1 text-sm px-2.5 py-1.5 rounded-md border border-border text-muted-foreground hover:text-destructive hover:border-destructive/50 transition-colors"
-            >
-              <X size={13} />
-              {isAr ? 'مسح التاريخ' : 'Clear dates'}
-            </button>
-          )}
-        </div>
-      </div>
-    </div>
   );
 }
 
@@ -224,10 +140,12 @@ export default function UserTasksList() {
   const [loading, setLoading]         = useState(true);
   const [answerModal, setAnswerModal] = useState(null);
   const [answers, setAnswers]         = useState([]);
+  const [query, setQuery]             = useState('');
   const [statusFilter, setStatusFilter] = useState('all'); // all | completed | incomplete
   const [dateFrom, setDateFrom]       = useState('');
   const [dateTo, setDateTo]           = useState('');
   const [page, setPage]               = useState(1);
+  const [filtersOpen, setFiltersOpen] = useState(false); // mobile-only collapse
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   const isLargeScreen = useMediaQuery('(min-width: 1024px)');
   const sentinelRef = useRef(null);
@@ -264,9 +182,14 @@ export default function UserTasksList() {
     }),
   [tasks]);
 
-  // Status + date filters
+  // Search + status + date filters
   const filtered = useMemo(() => {
     let result = sorted;
+    const q = query.trim().toLowerCase();
+    if (q) result = result.filter(t =>
+      [t.title, t.title_ar, t.description, t.description_ar]
+        .some(v => v && v.toLowerCase().includes(q))
+    );
     if (statusFilter === 'completed')  result = result.filter(t => t.submitted);
     if (statusFilter === 'incomplete') result = result.filter(t => !t.submitted);
     if (dateFrom) result = result.filter(t =>
@@ -276,9 +199,12 @@ export default function UserTasksList() {
       t.scheduled_at && new Date(t.scheduled_at) <= new Date(dateTo + 'T23:59:59')
     );
     return result;
-  }, [sorted, statusFilter, dateFrom, dateTo]);
+  }, [sorted, query, statusFilter, dateFrom, dateTo]);
 
   const resetView = () => { setPage(1); setVisibleCount(PAGE_SIZE); };
+  const hasFilters = query || statusFilter !== 'all' || dateFrom || dateTo;
+  const activeFilterCount = [query, statusFilter !== 'all', dateFrom, dateTo].filter(Boolean).length;
+  const clearAll = () => { setQuery(''); setStatusFilter('all'); setDateFrom(''); setDateTo(''); resetView(); };
 
   const paginated = useMemo(() => {
     const start = (page - 1) * PAGE_SIZE;
@@ -314,126 +240,76 @@ export default function UserTasksList() {
   const stats = useMemo(() => ({
     total:     tasks.length,
     completed: tasks.filter(t => t.submitted).length,
-    pending:   tasks.filter(t => !t.submitted && !t.locked).length,
   }), [tasks]);
-
+  const incomplete = stats.total - stats.completed;
   const pct = stats.total ? Math.round((stats.completed / stats.total) * 100) : 0;
-  const allDone = stats.total > 0 && stats.completed === stats.total;
 
   const subtitle = stats.total === 0
-    ? (isAr ? 'ستظهر مهامك هنا فور نشرها' : 'Your tasks will appear here once published')
-    : allDone
-      ? (isAr ? '🎉 أحسنت! أكملت جميع مهامك' : '🎉 Well done! You’ve completed everything')
-      : (isAr ? 'استمر في التقدم، خطوة بخطوة' : 'Keep going — one step at a time');
-
-  const statusOptions = [
-    { key: 'all',        label: isAr ? 'الكل' : 'All',              count: stats.total,                   icon: <ListChecks size={16} />,  activeClass: 'bg-primary text-primary-foreground border-primary' },
-    { key: 'completed',  label: isAr ? 'مكتملة' : 'Completed',      count: stats.completed,               icon: <CheckCircle2 size={16} />, activeClass: 'bg-[#3D6B35] text-white border-[#3D6B35]' },
-    { key: 'incomplete', label: isAr ? 'غير مكتملة' : 'Not completed', count: stats.total - stats.completed, icon: <Circle size={16} />,       activeClass: 'bg-[#A07830] text-white border-[#A07830]' },
-  ];
+    ? (isAr ? 'ستظهر قراءاتك هنا فور نشرها' : 'Your tasks will appear here once published')
+    : (isAr ? 'استمر في التقدم، خطوة بخطوة' : 'Keep going — one step at a time');
 
   const getStatusConfig = (task) => {
     if (task.locked) return {
-      bar: 'bg-muted-foreground/40', border: 'border-border', iconBg: 'bg-muted',
-      icon: <Lock size={22} className="text-muted-foreground" />,
-      badge: 'muted', label: t('locked'),
-      ctaClass: 'bg-muted text-muted-foreground',
-      ctaIcon: <Lock size={15} />, ctaLabel: t('complete_previous'),
+      accent: 'border-s-border',
+      labelClass: 'text-muted-foreground',
+      icon: <Lock size={13} />, label: t('locked'),
+      ctaClass: 'text-muted-foreground', ctaLabel: t('complete_previous'),
     };
     if (task.submitted) return {
-      bar: 'bg-[#3D6B35]', border: 'border-[#3D6B35]/30', iconBg: 'bg-[#3D6B35]/15',
-      icon: <CheckCircle2 size={22} className="text-[#3D6B35]" />,
-      badge: 'success', label: t('completed'),
-      ctaClass: 'bg-[#3D6B35]/10 text-[#3D6B35] group-hover:bg-[#3D6B35] group-hover:text-white',
-      ctaIcon: <Eye size={15} />, ctaLabel: isAr ? 'عرض إجاباتك' : 'View answers',
+      accent: 'border-s-[hsl(var(--success))]',
+      labelClass: 'text-[hsl(var(--success))]',
+      icon: <CheckCircle2 size={13} />, label: t('completed'),
+      ctaClass: 'text-[hsl(var(--success))]', ctaLabel: isAr ? 'عرض إجاباتك' : 'View answers',
     };
     return {
-      bar: 'bg-[#A07830]', border: 'border-border', iconBg: 'bg-[#A07830]/15',
-      icon: <BookOpen size={22} className="text-[#A07830]" />,
-      badge: 'warning', label: t('pending'),
-      ctaClass: 'bg-primary/10 text-primary group-hover:bg-primary group-hover:text-primary-foreground',
-      ctaIcon: <Play size={15} className="fill-current" />, ctaLabel: isAr ? 'ابدأ المهمة' : 'Start task',
+      accent: 'border-s-[hsl(var(--warning))]',
+      labelClass: 'text-[hsl(var(--warning))]',
+      icon: <BookOpen size={13} />, label: t('pending'),
+      ctaClass: 'text-primary', ctaLabel: isAr ? 'ابدأ القراءة' : 'Start task',
     };
   };
 
   if (loading) return <div className="py-16 text-center text-muted-foreground">{t('loading')}</div>;
 
-  const filterProps = {
-    isAr, statusFilter, setStatusFilter, statusOptions,
-    dateFrom, dateTo, setDateFrom, setDateTo, resetView,
-  };
-
   return (
     <div>
-      {/* ── Hero / progress header ── */}
-      <div className="mb-6 rounded-xl border border-border bg-gradient-to-br from-card to-muted/40 p-5 sm:p-6 shadow-sm">
-        <div className="flex items-start justify-between gap-4 flex-wrap">
+      {/* ── Classic header with underline (compact on mobile, full on desktop) ── */}
+      <header className="mb-4 sm:mb-6">
+        <div className="flex items-end justify-between gap-3 flex-wrap">
           <div>
-            <h1 className="text-2xl font-bold text-foreground">{t('my_tasks')}</h1>
-            <p className="text-sm text-muted-foreground mt-1">{subtitle}</p>
+            <h1 className="text-lg sm:text-2xl font-bold tracking-tight text-foreground">{t('my_tasks')}</h1>
+            <p className="hidden sm:block text-sm text-muted-foreground mt-1">{subtitle}</p>
           </div>
-
           {stats.total > 0 && (
-            <div className={`flex items-center gap-3 rounded-xl px-4 py-2.5 border ${
-              allDone ? 'bg-[#3D6B35]/10 border-[#3D6B35]/30' : 'bg-card border-border'
-            }`}>
-              {allDone && <Trophy size={22} className="text-[#3D6B35]" />}
-              <div className="text-center">
-                <p className="text-2xl font-bold text-[#3D6B35] leading-none">
-                  {stats.completed}
-                  <span className="text-base font-medium text-muted-foreground">/{stats.total}</span>
-                </p>
-                <p className="text-xs text-muted-foreground mt-1">{isAr ? 'مكتملة' : 'completed'}</p>
-              </div>
-            </div>
+            <p className="text-xs sm:text-sm text-muted-foreground">
+              <span className="font-bold text-foreground">{stats.completed}</span>
+              {' / '}{stats.total} {isAr ? 'مكتملة' : 'completed'}
+              <span className="mx-1.5 text-border">·</span>
+              <span className="font-semibold text-foreground">{pct}%</span>
+            </p>
           )}
         </div>
+        {/* Rule: thin full line with a short accent segment (classic detail) */}
+        <div className="mt-2 sm:mt-3 h-px bg-border relative">
+          <span className="absolute -top-px start-0 h-0.5 w-14 sm:w-20 bg-primary" />
+        </div>
+      </header>
 
-        {stats.total > 0 && (
-          <div className="mt-5">
-            <div className="h-2.5 rounded-full bg-muted overflow-hidden">
-              <div
-                className="h-full bg-[#3D6B35] rounded-full transition-all duration-500"
-                style={{ width: `${pct}%` }}
-              />
-            </div>
-            <div className="flex items-center justify-between mt-2 text-xs font-medium">
-              <span className="text-[#3D6B35]">{pct}% {isAr ? 'مكتمل' : 'complete'}</span>
-              {stats.pending > 0 && (
-                <span className="text-[#A07830]">
-                  {stats.pending} {isAr ? 'بانتظارك' : stats.pending === 1 ? 'task waiting' : 'tasks waiting'}
-                </span>
-              )}
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* ── Sidebar (filters) + cards ── */}
-      <div className="lg:grid lg:grid-cols-[240px_minmax(0,1fr)] lg:gap-6 lg:items-start">
-        {/* Filters: sticky sidebar on desktop, stacked panel on mobile */}
-        <aside className="mb-5 lg:mb-0 lg:sticky lg:top-6">
-          <div className="rounded-xl border border-border bg-card p-4 shadow-sm">
-            <Filters {...filterProps} />
-          </div>
-        </aside>
-
+      {/* ── Cards (left) + Search panel (right) ── */}
+      <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_260px] lg:gap-6 lg:items-start">
         {/* Cards */}
-        <div>
+        <div className="lg:order-1">
           {filtered.length === 0 ? (
-            <div className="text-center py-20 text-muted-foreground border border-dashed border-border rounded-xl">
+            <div className="text-center py-20 text-muted-foreground border border-dashed border-border">
               <CalendarSearch size={40} className="mx-auto mb-3 opacity-30" />
               <p className="text-sm">
-                {(statusFilter !== 'all' || dateFrom || dateTo)
-                  ? (isAr ? 'لا توجد مهام مطابقة للفلتر' : 'No tasks match your filters')
+                {hasFilters
+                  ? (isAr ? 'لا توجد قراءات مطابقة للبحث' : 'No tasks match your search')
                   : t('no_tasks')}
               </p>
-              {(statusFilter !== 'all' || dateFrom || dateTo) && (
-                <button
-                  onClick={() => { setStatusFilter('all'); setDateFrom(''); setDateTo(''); resetView(); }}
-                  className="text-primary text-sm hover:underline mt-2 inline-block"
-                >
-                  {isAr ? 'إزالة الفلاتر' : 'Clear filters'}
+              {hasFilters && (
+                <button onClick={clearAll} className="text-primary text-sm hover:underline mt-2 inline-block">
+                  {isAr ? 'مسح البحث' : 'Clear search'}
                 </button>
               )}
             </div>
@@ -469,6 +345,101 @@ export default function UserTasksList() {
             </>
           )}
         </div>
+
+        {/* Search / filter panel — right side on desktop, top on mobile */}
+        <aside className="order-first lg:order-2 mb-6 lg:mb-0 lg:sticky lg:top-6">
+          <div className="border border-border bg-card shadow-sm">
+            {/* Header — a tappable bar on mobile, static title on desktop */}
+            <button
+              type="button"
+              onClick={() => setFiltersOpen(o => !o)}
+              className={`w-full px-4 py-3 flex items-center gap-2 cursor-pointer lg:cursor-default lg:border-b lg:border-border ${
+                filtersOpen ? 'border-b border-border' : ''
+              }`}
+            >
+              <Search size={15} className="text-muted-foreground" />
+              <h2 className="text-sm font-bold uppercase tracking-wide text-foreground">
+                {isAr ? 'بحث' : 'Search'}
+              </h2>
+              {activeFilterCount > 0 && (
+                <span className="ms-1 text-[11px] font-bold bg-primary text-primary-foreground rounded-full min-w-[18px] h-[18px] inline-flex items-center justify-center px-1">
+                  {activeFilterCount}
+                </span>
+              )}
+              <ChevronDown
+                size={16}
+                className={`ms-auto lg:hidden text-muted-foreground transition-transform ${filtersOpen ? 'rotate-180' : ''}`}
+              />
+            </button>
+
+            {/* Body — collapsible on mobile, always open on desktop */}
+            <div className={`p-4 space-y-4 ${filtersOpen ? 'block' : 'hidden'} lg:block`}>
+              {/* Text search */}
+              <div>
+                <label className="text-xs font-semibold text-muted-foreground block mb-1.5">
+                  {isAr ? 'الكلمة المفتاحية' : 'Keyword'}
+                </label>
+                <Input
+                  type="text"
+                  value={query}
+                  onChange={e => { setQuery(e.target.value); resetView(); }}
+                  placeholder={isAr ? 'ابحث في القراءات...' : 'Search tasks...'}
+                  className="rounded-none"
+                />
+              </div>
+
+              {/* Status select */}
+              <div>
+                <label className="text-xs font-semibold text-muted-foreground block mb-1.5">
+                  {isAr ? 'الحالة' : 'Status'}
+                </label>
+                <Select
+                  value={statusFilter}
+                  onChange={e => { setStatusFilter(e.target.value); resetView(); }}
+                  className="rounded-none"
+                >
+                  <option value="all">{isAr ? `الكل (${stats.total})` : `All (${stats.total})`}</option>
+                  <option value="completed">{isAr ? `مكتملة (${stats.completed})` : `Completed (${stats.completed})`}</option>
+                  <option value="incomplete">{isAr ? `غير مكتملة (${incomplete})` : `Not completed (${incomplete})`}</option>
+                </Select>
+              </div>
+
+              {/* Date range */}
+              <div>
+                <label className="text-xs font-semibold text-muted-foreground block mb-1.5">
+                  {isAr ? 'من تاريخ' : 'From date'}
+                </label>
+                <Input
+                  type="date"
+                  value={dateFrom}
+                  onChange={e => { setDateFrom(e.target.value); resetView(); }}
+                  className="rounded-none"
+                />
+              </div>
+              <div>
+                <label className="text-xs font-semibold text-muted-foreground block mb-1.5">
+                  {isAr ? 'إلى تاريخ' : 'To date'}
+                </label>
+                <Input
+                  type="date"
+                  value={dateTo}
+                  onChange={e => { setDateTo(e.target.value); resetView(); }}
+                  className="rounded-none"
+                />
+              </div>
+
+              {hasFilters && (
+                <button
+                  onClick={clearAll}
+                  className="w-full flex items-center justify-center gap-1.5 text-sm py-2 border border-border text-muted-foreground hover:text-destructive hover:border-destructive/50 transition-colors"
+                >
+                  <X size={13} />
+                  {isAr ? 'مسح الكل' : 'Clear all'}
+                </button>
+              )}
+            </div>
+          </div>
+        </aside>
       </div>
 
       {/* ── Answers modal ── */}
@@ -479,14 +450,14 @@ export default function UserTasksList() {
               {answerModal && (isAr && answerModal.title_ar ? answerModal.title_ar : answerModal.title)}
             </DialogTitle>
           </DialogHeader>
-          <div className="h-0.5 bg-[#C4963A] -mx-6 mb-4" />
+          <div className="h-0.5 bg-primary -mx-6 mb-4" />
           <div className="space-y-4">
             {answers.map((ans, i) => (
               <div key={i} className="space-y-1.5">
                 <p className="text-sm font-semibold text-foreground">
                   {isAr && ans.question_ar ? ans.question_ar : ans.question_text}
                 </p>
-                <p className="text-sm bg-muted rounded-md px-3 py-2.5 text-foreground leading-relaxed">
+                <p className="text-sm bg-muted px-3 py-2.5 text-foreground leading-relaxed">
                   {ans.answer_text}
                 </p>
               </div>

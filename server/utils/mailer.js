@@ -12,9 +12,9 @@ const APP_URL = process.env.CLIENT_URL || 'http://localhost:5173';
 async function sendNewTaskEmail(user, task) {
   const isAr = user.language === 'ar';
   const title = isAr && task.title_ar ? task.title_ar : task.title;
-  const subject = isAr ? `مهمة جديدة: ${title}` : `New Task Available: ${title}`;
+  const subject = isAr ? `قراءة جديدة: ${title}` : `New Task Available: ${title}`;
   const html = isAr
-    ? `<div dir="rtl"><h2>مهمة جديدة متاحة</h2><p>مرحباً ${user.username}،</p><p>تم نشر مهمة جديدة: <strong>${title}</strong></p><p><a href="${APP_URL}/user/tasks">اضغط هنا للبدء</a></p></div>`
+    ? `<div dir="rtl"><h2>قراءة جديدة متاحة</h2><p>مرحباً ${user.username}،</p><p>تم نشر قراءة جديدة: <strong>${title}</strong></p><p><a href="${APP_URL}/user/tasks">اضغط هنا للبدء</a></p></div>`
     : `<h2>New Task Available</h2><p>Hello ${user.username},</p><p>A new task has been published: <strong>${title}</strong></p><p><a href="${APP_URL}/user/tasks">Click here to start</a></p>`;
 
   let status = 'sent';
@@ -50,9 +50,9 @@ async function sendReminderEmail(user, pendingTasks) {
     .map(t => `<li>${isAr && t.title_ar ? t.title_ar : t.title}</li>`)
     .join('');
 
-  const subject = isAr ? 'تذكير: لديك مهام معلقة' : 'Reminder: You have pending tasks';
+  const subject = isAr ? 'تذكير: لديك قراءات معلقة' : 'Reminder: You have pending tasks';
   const html = isAr
-    ? `<div dir="rtl"><h2>تذكير بالمهام المعلقة</h2><p>مرحباً ${user.username}،</p><p>لديك المهام التالية التي لم تكتملها بعد:</p><ul>${taskList}</ul><p><a href="${APP_URL}/user/tasks">اضغط هنا للبدء</a></p></div>`
+    ? `<div dir="rtl"><h2>تذكير بالقراءات المعلقة</h2><p>مرحباً ${user.username}،</p><p>لديك القراءات التالية التي لم تكتملها بعد:</p><ul>${taskList}</ul><p><a href="${APP_URL}/user/tasks">اضغط هنا للبدء</a></p></div>`
     : `<h2>Pending Tasks Reminder</h2><p>Hello ${user.username},</p><p>You have the following tasks pending:</p><ul>${taskList}</ul><p><a href="${APP_URL}/user/tasks">Click here to complete them</a></p>`;
 
   let status = 'sent';

@@ -10,4 +10,13 @@ i18n.use(initReactI18next).init({
   interpolation: { escapeValue: false },
 });
 
+// Keep the document title + direction in sync with the active language.
+function applyDocLang() {
+  document.title = i18n.t('app_title');
+  document.documentElement.setAttribute('lang', i18n.language);
+  document.documentElement.setAttribute('dir', i18n.language === 'ar' ? 'rtl' : 'ltr');
+}
+i18n.on('languageChanged', applyDocLang);
+applyDocLang();
+
 export default i18n;
