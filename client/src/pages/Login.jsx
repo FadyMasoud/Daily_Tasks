@@ -23,10 +23,13 @@ export default function Login() {
       toast({ title: t('toast_hello', { name: data.user.username }), description: t('toast_hello_desc') });
       navigate(data.user.role === 'admin' ? '/admin/tasks' : '/user/tasks');
     } catch (err) {
+      const inactive = err.response?.status === 403 && err.response?.data?.code === 'inactive';
       toast({
-        title: t('error'),
-        description: err.response?.data?.message || t('invalid_credentials'),
-        variant: 'destructive',
+        title: inactive ? t('account_pending_title') : t('error'),
+        description: inactive
+          ? t('account_inactive')
+          : (err.response?.data?.message || t('invalid_credentials')),
+        variant: inactive ? 'default' : 'destructive',
       });
     } finally {
       setLoading(false);

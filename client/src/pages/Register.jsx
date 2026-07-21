@@ -2,13 +2,11 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
-import { useAuth } from '../context/AuthContext';
 import { useToast } from '../components/ui/toast';
 import { BookOpen, Mail, Lock, User, UserPlus } from 'lucide-react';
 
 export default function Register() {
   const { t }     = useTranslation();
-  const { login } = useAuth();
   const navigate  = useNavigate();
   const { toast } = useToast();
   const [form,    setForm]    = useState({ username: '', email: '', password: '' });
@@ -18,10 +16,9 @@ export default function Register() {
     e.preventDefault();
     setLoading(true);
     try {
-      const { data } = await axios.post('/api/auth/register', form);
-      login(data.user, data.token);
-      toast({ title: t('toast_register_success'), description: t('toast_register_desc', { name: data.user.username }) });
-      navigate(data.user.role === 'admin' ? '/admin/tasks' : '/user/tasks');
+      await axios.post('/api/auth/register', form);
+      toast({ title: t('register_pending_title'), description: t('register_pending_desc') });
+      navigate('/login');
     } catch (err) {
       toast({
         title: t('error'),

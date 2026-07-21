@@ -23,7 +23,7 @@ async function sendNewTaskEmail(user, task) {
   } else {
     try {
       await resend.emails.send({
-        from: 'Daily Tasks <onboarding@resend.dev>',
+        from: 'Daily Tasks <fadykassed@gmail.com>',
         to: user.email,
         subject,
         html,

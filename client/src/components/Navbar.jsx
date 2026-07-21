@@ -5,7 +5,7 @@ import { useToast } from './ui/toast';
 import { useConfirm } from './ui/confirm-dialog';
 import {
   Sun, Moon, LogOut, BookOpen, CalendarDays, Menu, X,
-  ListChecks, Upload, Inbox, Newspaper, History,
+  ListChecks, Upload, Inbox, Newspaper, History, Users, User,
 } from 'lucide-react';
 import { EgyptFlag, USAFlag } from './Flags';
 import { useState, useEffect } from 'react';
@@ -55,6 +55,7 @@ export default function Navbar() {
     { to: '/admin/tasks',       label: t('task_list'),   icon: <ListChecks size={19} /> },
     { to: '/admin/upload',      label: t('upload_task'), icon: <Upload size={19} /> },
     { to: '/admin/submissions', label: t('submissions'), icon: <Inbox size={19} /> },
+    { to: '/admin/users',       label: t('users_title'), icon: <Users size={19} /> },
     { to: '/admin/posts',       label: t('nav_feed'),    icon: <Newspaper size={19} /> },
   ];
 
@@ -105,6 +106,14 @@ export default function Navbar() {
 
           {/* Controls */}
           <div className="flex items-center gap-1.5 shrink-0">
+            {user && (
+              <span className="hidden sm:flex items-center gap-1.5 text-sm font-medium text-foreground max-w-[150px] me-1">
+                <span className="w-7 h-7 rounded-full bg-primary/10 text-primary flex items-center justify-center shrink-0">
+                  <User size={15} />
+                </span>
+                <span className="truncate">{user.username}</span>
+              </span>
+            )}
             <button
               onClick={toggleLang}
               title={i18n.language === 'ar' ? 'Switch to English' : 'التبديل إلى العربية'}
@@ -144,6 +153,17 @@ export default function Navbar() {
         {/* ── Mobile dropdown menu ── */}
         {menuOpen && user && (
           <div className="md:hidden border-t border-border pb-3 pt-2 space-y-0.5">
+            <div className="flex items-center gap-2 px-3 py-2.5 mb-1 border-b border-border">
+              <span className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center shrink-0">
+                <User size={16} />
+              </span>
+              <div className="min-w-0">
+                <p className="text-sm font-semibold text-foreground truncate">{user.username}</p>
+                <p className="text-xs text-muted-foreground">
+                  {user.role === 'admin' ? t('admin_panel') : t('my_tasks')}
+                </p>
+              </div>
+            </div>
             {links.map(link => (
               <Link
                 key={link.to}

@@ -20,6 +20,7 @@ CREATE TABLE users (
   password_hash VARCHAR(255) NOT NULL,
   role          ENUM('admin','user') NOT NULL DEFAULT 'user',
   language      ENUM('ar','en') NOT NULL DEFAULT 'en',
+  active        TINYINT(1) NOT NULL DEFAULT 0,   -- 0 = pending admin approval, 1 = can log in
   created_at    DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at    DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB;

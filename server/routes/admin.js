@@ -1,7 +1,10 @@
 const express = require('express');
+const bcrypt = require('bcrypt');
 const pool = require('../db');
 const auth = require('../middleware/auth');
 const adminOnly = require('../middleware/adminOnly');
+
+const SALT_ROUNDS = 12;
 
 const router = express.Router();
 
@@ -101,13 +104,97 @@ router.get('/submission-detail/:taskId/:userId', auth, adminOnly, async (req, re
   }
 });
 
-// GET /api/admin/users
+// GET /api/admin/users — list all users (no password)
 router.get('/users', auth, adminOnly, async (req, res) => {
   try {
     const [users] = await pool.execute(
-      'SELECT id, username, email, role, language, created_at FROM users ORDER BY created_at DESC'
+      'SELECT id, username, email, role, language, active, created_at FROM users ORDER BY created_at DESC'
     );
     res.json(users);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// POST /api/admin/users — create a new user (used to add admins)
+router.post('/users', auth, adminOnly, async (req, res) => {
+  const { username, email, password, role = 'admin', language = 'en' } = req.body;
+  if (!username || !email || !password)
+    return res.status(400).json({ message: 'username, email and password are required' });
+  if (!['admin', 'user'].includes(role))
+    return res.status(400).json({ message: 'Invalid role' });
+
+  try {
+    const hash = await bcrypt.hash(password, SALT_ROUNDS);
+    const [result] = await pool.execute(
+      'INSERT INTO users (username, email, password_hash, role, language, active) VALUES (?, ?, ?, ?, ?, 1)',
+      [username, email, hash, role, language]
+    );
+    const [[user]] = await pool.execute(
+      'SELECT id, username, email, role, language, active, created_at FROM users WHERE id = ?',
+      [result.insertId]
+    );
+    res.status(201).json(user);
+  } catch (err) {
+    if (err.code === 'ER_DUP_ENTRY')
+      return res.status(409).json({ message: 'Username or email already exists' });
+    console.error(err);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// PATCH /api/admin/users/:id — update user (active, role, profile, password)
+router.patch('/users/:id', auth, adminOnly, async (req, res) => {
+  const id = Number(req.params.id);
+  const isSelf = id === Number(req.user.id);
+  const { username, email, role, language, active, password } = req.body;
+
+  // Guard against self-lockout
+  if (isSelf && active !== undefined && !active)
+    return res.status(400).json({ message: 'You cannot deactivate your own account' });
+  if (isSelf && role !== undefined && role !== 'admin')
+    return res.status(400).json({ message: 'You cannot change your own role' });
+  if (role !== undefined && !['admin', 'user'].includes(role))
+    return res.status(400).json({ message: 'Invalid role' });
+
+  try {
+    const fields = [];
+    const values = [];
+    if (username !== undefined) { fields.push('username = ?'); values.push(username); }
+    if (email    !== undefined) { fields.push('email = ?');    values.push(email); }
+    if (role     !== undefined) { fields.push('role = ?');     values.push(role); }
+    if (language !== undefined) { fields.push('language = ?'); values.push(language); }
+    if (active   !== undefined) { fields.push('active = ?');   values.push(active ? 1 : 0); }
+    if (password) { fields.push('password_hash = ?'); values.push(await bcrypt.hash(password, SALT_ROUNDS)); }
+
+    if (!fields.length) return res.status(400).json({ message: 'No fields to update' });
+
+    values.push(id);
+    await pool.execute(`UPDATE users SET ${fields.join(', ')} WHERE id = ?`, values);
+    const [[user]] = await pool.execute(
+      'SELECT id, username, email, role, language, active, created_at FROM users WHERE id = ?',
+      [id]
+    );
+    if (!user) return res.status(404).json({ message: 'User not found' });
+    res.json(user);
+  } catch (err) {
+    if (err.code === 'ER_DUP_ENTRY')
+      return res.status(409).json({ message: 'Username or email already exists' });
+    console.error(err);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// DELETE /api/admin/users/:id
+router.delete('/users/:id', auth, adminOnly, async (req, res) => {
+  const id = Number(req.params.id);
+  if (id === Number(req.user.id))
+    return res.status(400).json({ message: 'You cannot delete your own account' });
+  try {
+    const [result] = await pool.execute('DELETE FROM users WHERE id = ?', [id]);
+    if (!result.affectedRows) return res.status(404).json({ message: 'User not found' });
+    res.json({ message: 'User deleted' });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: 'Server error' });

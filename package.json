@@ -5,10 +5,13 @@
   "scripts": {
     "dev": "concurrently \"npm run dev --prefix server\" \"npm run dev --prefix client\"",
     "install:all": "npm install && npm install --prefix client && npm install --prefix server",
-    "build": "npm install --prefix client && npm install --prefix server && npm run build --prefix client",
+    "build": "npm install --include=dev --prefix client && npm install --prefix server && npm run build --prefix client",
     "start": "node server/index.js"
   },
   "devDependencies": {
     "concurrently": "^8.0.0"
+  },
+  "engines": {
+    "node": ">=18"
   }
 }

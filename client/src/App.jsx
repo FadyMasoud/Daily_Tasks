@@ -11,6 +11,7 @@ import AdminSubmissions from './pages/admin/Submissions';
 import TaskUserDetail  from './pages/admin/TaskUserDetail';
 import AdminPosts      from './pages/admin/AdminPosts';
 import PostEditor      from './pages/admin/PostEditor';
+import AdminUsers      from './pages/admin/Users';
 import UserTasksList   from './pages/user/TasksList';
 import TaskDetail      from './pages/user/TaskDetail';
 import UserHistory     from './pages/user/History';
@@ -44,6 +45,7 @@ export default function App() {
       <Route path="/admin/upload"      element={<Protected adminOnly><UploadTask /></Protected>} />
       <Route path="/admin/submissions" element={<Protected adminOnly><AdminSubmissions /></Protected>} />
       <Route path="/admin/submissions/:taskId/user/:userId" element={<Protected adminOnly><TaskUserDetail /></Protected>} />
+      <Route path="/admin/users"       element={<Protected adminOnly><AdminUsers /></Protected>} />
       <Route path="/admin/posts"       element={<Protected adminOnly><AdminPosts /></Protected>} />
       <Route path="/admin/posts/create" element={<Protected adminOnly><PostEditor /></Protected>} />
       <Route path="/admin/posts/:id/edit" element={<Protected adminOnly><PostEditor /></Protected>} />
