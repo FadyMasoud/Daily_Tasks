@@ -125,7 +125,7 @@
 
   "image_optional": "Image (optional)",
   "image_drag": "Drag an image here or click to browse",
-  "image_hint": "JPG · PNG · GIF · WebP — up to 10 MB",
+  "image_hint": "JPG · PNG · GIF · WebP — up to 4 MB",
   "content_label": "Content *",
   "content_placeholder": "Write reflection content here...",
   "chars_count": "{{n}} characters",

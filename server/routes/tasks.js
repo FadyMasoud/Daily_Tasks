@@ -1,7 +1,6 @@
 const express = require('express');
 const multer = require('multer');
 const path = require('path');
-const fs = require('fs');
 const pool = require('../db');
 const auth = require('../middleware/auth');
 const adminOnly = require('../middleware/adminOnly');
@@ -9,14 +8,8 @@ const { parseQuestionsFromExcel } = require('../utils/excelParser');
 
 const router = express.Router();
 
-const uploadDir = path.join(__dirname, '../uploads');
-if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
-
-const storage = multer.diskStorage({
-  destination: (_req, _file, cb) => cb(null, uploadDir),
-  filename: (_req, file, cb) => cb(null, `${Date.now()}-${file.originalname}`),
-});
-const upload = multer({ storage, fileFilter: (_req, file, cb) => {
+// Excel files are parsed straight from memory — nothing is written to disk.
+const upload = multer({ storage: multer.memoryStorage(), fileFilter: (_req, file, cb) => {
   const ext = path.extname(file.originalname).toLowerCase();
   cb(null, ext === '.xlsx' || ext === '.xls');
 }});
@@ -174,7 +167,7 @@ router.post('/upload-questions/:taskId', auth, adminOnly, upload.single('file'),
   if (!req.file) return res.status(400).json({ message: 'No file uploaded' });
 
   try {
-    const questions = parseQuestionsFromExcel(req.file.path);
+    const questions = parseQuestionsFromExcel(req.file.buffer);
     if (!questions.length) return res.status(400).json({ message: 'No questions found in file' });
 
     await pool.execute('DELETE FROM questions WHERE task_id = ?', [req.params.taskId]);
@@ -184,7 +177,6 @@ router.post('/upload-questions/:taskId', auth, adminOnly, upload.single('file'),
         [req.params.taskId, q.question_text, q.question_ar, q.order_index]
       );
     }
-    fs.unlinkSync(req.file.path);
     res.json({ message: 'Questions uploaded', count: questions.length, questions });
   } catch (err) {
     console.error(err);
@@ -218,8 +210,7 @@ router.post('/save-questions/:taskId', auth, adminOnly, async (req, res) => {
 router.post('/parse-preview', auth, adminOnly, upload.single('file'), async (req, res) => {
   if (!req.file) return res.status(400).json({ message: 'No file uploaded' });
   try {
-    const questions = parseQuestionsFromExcel(req.file.path);
-    fs.unlinkSync(req.file.path);
+    const questions = parseQuestionsFromExcel(req.file.buffer);
     res.json({ questions });
   } catch (err) {
     console.error(err);

@@ -125,7 +125,7 @@
 
   "image_optional": "الصورة (اختياري)",
   "image_drag": "اسحب صورة هنا أو اضغط للاختيار",
-  "image_hint": "JPG · PNG · GIF · WebP — حتى 10 MB",
+  "image_hint": "JPG · PNG · GIF · WebP — حتى 4 MB",
   "content_label": "المحتوى *",
   "content_placeholder": "اكتب محتوى التأمل هنا...",
   "chars_count": "{{n}} حرف",

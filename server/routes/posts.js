@@ -1,27 +1,17 @@
 const express  = require('express');
 const multer   = require('multer');
 const path     = require('path');
-const fs       = require('fs');
 const pool     = require('../db');
 const auth     = require('../middleware/auth');
 const adminOnly = require('../middleware/adminOnly');
+const { saveImage, deleteImage } = require('../utils/imageStore');
 
 const router = express.Router();
 
-// ── Upload directory ──────────────────────────────────────────
-const uploadDir = path.join(__dirname, '../uploads/posts');
-if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
-
-const storage = multer.diskStorage({
-  destination: (_req, _file, cb) => cb(null, uploadDir),
-  filename: (_req, file, cb) => {
-    const ext = path.extname(file.originalname).toLowerCase();
-    cb(null, `post-${Date.now()}${ext}`);
-  },
-});
+// ── Upload (kept in memory, then stored by utils/imageStore) ──
 const upload = multer({
-  storage,
-  limits: { fileSize: 10 * 1024 * 1024 }, // 10 MB
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 4 * 1024 * 1024 }, // 4 MB — Vercel rejects request bodies over 4.5 MB
   fileFilter: (_req, file, cb) => {
     const allowed = ['.jpg', '.jpeg', '.png', '.gif', '.webp'];
     cb(null, allowed.includes(path.extname(file.originalname).toLowerCase()));
@@ -86,8 +76,8 @@ router.post('/', auth, adminOnly, upload.single('image'), async (req, res) => {
   const { description } = req.body;
   if (!description?.trim()) return res.status(400).json({ message: 'Description required' });
 
-  const imagePath = req.file ? `/uploads/posts/${req.file.filename}` : null;
   try {
+    const imagePath = req.file ? await saveImage(req.file) : null;
     const [result] = await pool.execute(
       'INSERT INTO posts (admin_id, image_path, description) VALUES (?, ?, ?)',
       [req.user.id, imagePath, description.trim()]
@@ -117,12 +107,8 @@ router.patch('/:id', auth, adminOnly, upload.single('image'), async (req, res) =
     let   newImagePath = post.image_path;
 
     if (req.file) {
-      // Delete old image if it exists
-      if (post.image_path) {
-        const oldFile = path.join(__dirname, '..', post.image_path);
-        if (fs.existsSync(oldFile)) fs.unlinkSync(oldFile);
-      }
-      newImagePath = `/uploads/posts/${req.file.filename}`;
+      newImagePath = await saveImage(req.file);
+      await deleteImage(post.image_path);
     }
 
     await pool.execute(
@@ -142,10 +128,7 @@ router.delete('/:id', auth, adminOnly, async (req, res) => {
     const [[post]] = await pool.execute('SELECT * FROM posts WHERE id = ?', [req.params.id]);
     if (!post) return res.status(404).json({ message: 'Post not found' });
 
-    if (post.image_path) {
-      const file = path.join(__dirname, '..', post.image_path);
-      if (fs.existsSync(file)) fs.unlinkSync(file);
-    }
+    await deleteImage(post.image_path);
     await pool.execute('DELETE FROM posts WHERE id = ?', [req.params.id]);
     res.json({ message: 'Deleted' });
   } catch (err) {

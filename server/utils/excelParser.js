@@ -1,7 +1,8 @@
 const XLSX = require('xlsx');
 
-function parseQuestionsFromExcel(filePath) {
-  const workbook = XLSX.readFile(filePath);
+// Takes the uploaded file's Buffer (multer memoryStorage — no disk needed on serverless).
+function parseQuestionsFromExcel(buffer) {
+  const workbook = XLSX.read(buffer, { type: 'buffer' });
   const sheet = workbook.Sheets[workbook.SheetNames[0]];
   const rows = XLSX.utils.sheet_to_json(sheet, { header: 1 });
 
