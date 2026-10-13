@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../components/ui/toast';
+import InstallAppCard from '../components/InstallAppCard';
 import { BookOpen, Mail, Lock, LogIn } from 'lucide-react';
 
 export default function Login() {
@@ -111,6 +112,8 @@ export default function Login() {
                 {t('sign_up')}
               </Link>
             </div>
+
+            <InstallAppCard />
           </div>
         </div>
 

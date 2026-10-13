@@ -152,5 +152,11 @@
   "time_just_now": "منذ لحظات",
   "time_minutes_ago": "منذ {{n}} دقيقة",
   "time_hours_ago": "منذ {{n}} ساعة",
-  "time_days_ago": "منذ {{n}} يوم"
+  "time_days_ago": "منذ {{n}} يوم",
+
+  "install_title": "ثبّت التطبيق على جهازك",
+  "install_desc": "للدخول السريع من الشاشة الرئيسية بدون متصفح",
+  "install_button": "تثبيت",
+  "install_ios_1": "اضغط على زر المشاركة",
+  "install_ios_2": "ثم اختر «إضافة إلى الشاشة الرئيسية»"
 }
