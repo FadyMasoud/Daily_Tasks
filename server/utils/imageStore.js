@@ -20,6 +20,10 @@ async function saveImage(file) {
     return blob.url;
   }
 
+  // Vercel's filesystem is read-only — without Blob there is nowhere to put the file.
+  if (process.env.VERCEL)
+    throw new Error('Image storage is not configured: connect a Vercel Blob store (BLOB_READ_WRITE_TOKEN) and redeploy');
+
   if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
   fs.writeFileSync(path.join(uploadDir, name), file.buffer);
   return `/uploads/posts/${name}`;

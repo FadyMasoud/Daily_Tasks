@@ -90,7 +90,8 @@ router.post('/', auth, adminOnly, upload.single('image'), async (req, res) => {
     res.status(201).json({ ...post, like_count: 0, comment_count: 0, liked_by_me: false });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ message: 'Server error' });
+    // Admin-only route — include the cause so upload/storage problems are visible.
+    res.status(500).json({ message: 'Server error', detail: err.message });
   }
 });
 
@@ -118,7 +119,7 @@ router.patch('/:id', auth, adminOnly, upload.single('image'), async (req, res) =
     res.json({ message: 'Updated' });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ message: 'Server error', detail: err.message });
   }
 });
 

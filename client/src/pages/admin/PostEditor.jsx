@@ -80,7 +80,7 @@ export default function PostEditor() {
       }
       navigate('/admin/posts');
     } catch (err) {
-      toast({ title: t('reflection_save_error'), description: err.response?.data?.message, variant: 'destructive' });
+      toast({ title: t('reflection_save_error'), description: err.response?.data?.detail || err.response?.data?.message, variant: 'destructive' });
     } finally {
       setLoading(false);
     }
